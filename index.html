@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Subscription Manager</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+  <header><h1>💳 Subscription Manager</h1></header>
+
+  <main>
+    <section class="card form">
+      <input id="name" placeholder="Name (Netflix)">
+      <input id="price" type="number" placeholder="Price">
+      <input id="date" type="date">
+      <select id="category">
+        <option>OTT</option>
+        <option>Music</option>
+        <option>Software</option>
+        <option>Other</option>
+      </select>
+      <button class="add" onclick="addSub()">Add</button>
+    </section>
+
+    <section class="card">
+      <h3>Your Subscriptions</h3>
+      <ul id="list"></ul>
+      <h3 class="total">Total: ₹<span id="total">0</span></h3>
+    </section>
+
+    <section class="card">
+      <h3>Spending by Category</h3>
+      <div id="summary"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
