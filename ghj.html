@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brightloop Billing</title>
+<style>
+:root{color-scheme:light dark;--bg:#f5f4fb;--card:#fff;--ink:#17152b;--mut:#6b6987;--line:#e4e2f0;--pri:#6d28d9;--red:#dc2626;--grn:#059669;--amb:#d97706}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0b12;--card:#15151f;--ink:#f3f2ff;--mut:#9b99b8;--line:#272739;--pri:#8b5cf6;--red:#ff6b81;--grn:#34d399;--amb:#fbbf24}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0b0b12;--card:#15151f;--ink:#f3f2ff;--mut:#9b99b8;--line:#272739;--pri:#8b5cf6;--red:#ff6b81;--grn:#34d399;--amb:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:8px}
+input[type=checkbox]{width:auto;margin:0 8px 0 0}
+a{color:var(--pri);font-weight:600;text-decoration:none}
+.btn{display:inline-block;padding:10px 16px;border:1px solid transparent;border-radius:10px;background:var(--pri);color:#fff;font-weight:700;margin:2px 4px 2px 0}
+.btn.g{background:var(--card);color:var(--ink);border-color:var(--line)}.btn.s{padding:6px 11px;font-size:12.5px}.btn:disabled{opacity:.4}
+.mut{color:var(--mut)}.err{color:var(--red);min-height:18px;font-size:13px;margin:4px 0}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line)}.sp{flex:1}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+nav button{white-space:nowrap;padding:7px 13px;border:0;border-radius:16px;background:none;color:var(--mut);font-weight:600}nav button.on{background:var(--pri);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.top h2{font-size:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}.card h3{margin-bottom:8px}
+.sc{overflow-x:auto;padding:4px 10px}table{width:100%;border-collapse:collapse;min-width:560px}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);padding:10px 8px}td{padding:10px 8px;border-top:1px solid var(--line);vertical-align:top}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}.kp .card{margin:0}.kp b{display:block;font-size:22px;margin-top:2px}
+.chip{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11.5px;font-weight:700;background:var(--line);color:var(--mut)}
+.chip.active,.chip.paid{background:rgba(5,150,105,.15);color:var(--grn)}.chip.confirmed,.chip.quotation{background:rgba(109,40,217,.15);color:var(--pri)}.chip.overdue,.chip.cancelled{background:rgba(220,38,38,.15);color:var(--red)}.chip.red{background:rgba(220,38,38,.15);color:var(--red)}
+.fl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.fl>*{flex:1;min-width:140px;margin:0}
+.lab{display:block;font-size:12px;color:var(--mut);margin:6px 0 3px}.chk{display:flex;align-items:center;margin:8px 0}
+.x{border:0;background:none;color:var(--mut);padding:4px 7px;font-size:15px}
+.pgr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.toast{background:rgba(5,150,105,.15);color:var(--grn);padding:10px 14px;border-radius:12px;margin-bottom:12px;font-weight:600}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.steps span{padding:4px 11px;border-radius:12px;background:var(--line);color:var(--mut);font-size:12px}.steps .on{background:var(--pri);color:#fff;font-weight:700}
+.row{display:grid;grid-template-columns:2fr 70px 1.2fr auto;gap:6px;align-items:center}.row *{margin:0}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 16px;margin-bottom:10px}.dl small{display:block;color:var(--mut)}
+.tot{text-align:right;margin-top:8px}.tot div{margin:2px 0}
+#auth{max-width:420px;margin:0 auto;padding:32px 20px}#auth h1{font-size:28px;margin:10px 0 4px}
+.seg{display:flex;gap:6px;margin:16px 0 12px}.seg button{flex:1;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-weight:600}.seg .on{background:var(--pri);color:#fff}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}}
+</style></head><body><div id="root"></div>
+<script>
+const $=s=>document.querySelector(s);
+const R=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
+const W=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let DB=R('bl_db',null),me=null,page='dash',arg=null,pg=0,flt={},msg='',F=null,au='in',rl=null,rt=null,PM=null;
+const save=()=>{PM=null;W('bl_db',DB)};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr=n=>'₹'+(+n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const ds=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+const today=()=>ds(new Date()),dt=d=>new Date(d+'T00:00:00');
+const addD=(d,n)=>{const x=dt(d);x.setDate(x.getDate()+n);return ds(x)};
+const addP=(d,p)=>{const x=dt(d);if(p==='daily')x.setDate(x.getDate()+1);else if(p==='weekly')x.setDate(x.getDate()+7);else if(p==='monthly')x.setMonth(x.getMonth()+1);else x.setFullYear(x.getFullYear()+1);return ds(x)};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const get=(en,id)=>DB[en].find(x=>x.id===id),cn=id=>get('users',id)?.name||'—';
+const cd=id=>{const u=get('users',id)||{};return [u.co,u.email,u.ph,u.ad].filter(Boolean).map(x=>'<br><span class="mut">'+esc(x)+'</span>').join('')};
+const pwOk=p=>p.length>8&&/[A-Z]/.test(p)&&/[a-z]/.test(p)&&/[^A-Za-z0-9]/.test(p);
+const PWMSG='Password must be more than 8 characters with an uppercase letter, a lowercase letter and a special character.';
+async function hash(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const ST=['Draft','Quotation','Confirmed','Active','Closed'];
+const chip=s=>`<span class="chip ${String(s).split(' ')[0].toLowerCase()}">${esc(s)}</span>`;
+
+/* ---- generic master data ---- */
+const ENT={
+products:{t:'Products',f:[['name','Name','t'],['type','Type','s',['Service','Goods','Add-on']],['sale','Sales price','n'],['cost','Cost price','n'],['notes','Notes','t'],['variants','Variants (Attribute:Value:Extra price, comma separated. e.g. Brand:Odoo:560)','t']],c:['name','type','sale','cost']},
+plans:{t:'Plans',f:[['name','Name','t'],['price','Price','n'],['period','Billing period','s',['daily','weekly','monthly','yearly']],['minQty','Minimum quantity','n'],['start','Available from','d'],['end','Available until','d'],['autoClose','Close automatically when it ends','c'],['closable','Can be closed early','c'],['pausable','Can be paused','c'],['renewable','Can be renewed','c']],c:['name','price','period','start','end']},
+templates:{t:'Quote templates',f:[['name','Name','t'],['plan','Plan','r','plans'],['pid','Product 1','r','products'],['qty','Quantity 1','n'],['pid2','Product 2 (optional)','r','products'],['qty2','Quantity 2','n'],['pid3','Product 3 (optional)','r','products'],['qty3','Quantity 3','n'],['days','Valid for (days)','n']],c:['name','plan','pid','pid2','days']},
+taxes:{t:'Taxes',f:[['name','Name','t'],['rate','Rate %','n']],c:['name','rate']},
+discounts:{t:'Discounts',f:[['name','Name','t'],['kind','Type','s',['percent','fixed']],['value','Value','n'],['minAmt','Minimum purchase','n'],['minQty','Minimum quantity','n'],['start','Start date','d'],['end','End date','d'],['limit','Usage limit (0 = unlimited)','n'],['scope','Applies to','s',['product','subscription']],['target','Product (when applying to a product)','r','products']],c:['name','kind','value','scope','used']}};
+const cell=(E,k,r)=>{const f=E.f.find(x=>x[0]===k);if(!f)return esc(r[k]??0);const v=r[k];if(f[2]==='r')return esc(get(f[3],v)?.name||'—');if(f[2]==='c')return v?'Yes':'No';if(f[2]==='n'&&/price|sale|cost|minAmt/.test(k))return inr(v);return esc(v??'')||'—'};
+const pg_=a=>a.slice(pg*20,pg*20+20);
+const pager=n=>n>20?`<div class="pgr noprint"><button class="btn g s" ${pg?'':'disabled'} onclick="pg--;render()">‹ Prev</button><span class="mut">Page ${pg+1} of ${Math.ceil(n/20)} · ${n} records</span><button class="btn g s" ${(pg+1)*20<n?'':'disabled'} onclick="pg++;render()">Next ›</button></div>`:'';
+const tbl=(h,rows)=>`<div class="card sc"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.length?rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${h.length}" class="mut">Nothing here yet.</td></tr>`}</table></div>`;
+function entList(en){const E=ENT[en],a=DB[en];return`<div class="top"><h2>${E.t}</h2><button class="btn" onclick="go('${en}','new')">＋ New</button></div>`+tbl(E.c.map(k=>(E.f.find(x=>x[0]===k)||[0,k[0].toUpperCase()+k.slice(1)])[1]).concat(['']),pg_(a).map(r=>E.c.map(k=>cell(E,k,r)).concat([`<button class="x" onclick="go('${en}','${r.id}')">✎</button><button class="x" onclick="del('${en}','${r.id}')">✕</button>`])))+pager(a.length)}
+function entForm(en,id){const E=ENT[en],r=id?get(en,id):{};return`<div class="card"><h3>${id?'Edit':'New'} · ${E.t}</h3>`+E.f.map(([k,l,t,o])=>{const v=r[k]??'';if(t==='c')return`<label class="chk"><input type="checkbox" id="f_${k}" ${r[k]?'checked':''}>${l}</label>`;let i;
+if(t==='s')i=`<select id="f_${k}">${o.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('')}</select>`;
+else if(t==='r')i=`<select id="f_${k}"><option value="">—</option>${DB[o].map(x=>`<option value="${x.id}" ${x.id===v?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+else i=`<input id="f_${k}" type="${t==='n'?'number':t==='d'?'date':'text'}" value="${esc(v)}" ${t==='n'?'step="any" min="0"':''}>`;
+return`<label class="lab">${l}</label>${i}`}).join('')+`<div class="err" id="err"></div><button class="btn" onclick="saveEnt('${en}','${id||''}')">Save</button><button class="btn g" onclick="go('${en}')">Cancel</button></div>`}
+function saveEnt(en,id){const o={};for(const[k,l,t]of ENT[en].f){const el=$('#f_'+k);o[k]=t==='c'?el.checked:t==='n'?+el.value||0:el.value.trim()}
+if(!o.name){$('#err').textContent='Name is required.';return}
+if(en==='plans'&&o.end&&o.start&&o.end<o.start){$('#err').textContent='End date must be after the start date.';return}
+if(en==='discounts'&&o.value<=0){$('#err').textContent='Enter a discount value above 0.';return}
+if(id)Object.assign(get(en,id),o);else DB[en].push({id:uid(),used:0,...o});save();go(en)}
+function del(en,id){if(confirm('Delete this record?')){DB[en]=DB[en].filter(x=>x.id!==id);save();render()}}
+
+/* ---- maths ---- */
+const paidMap=()=>PM||(PM=DB.payments.reduce((m,p)=>(m[p.inv]=(m[p.inv]||0)+p.amt,m),{}));
+const out=i=>Math.max(0,i.total-(paidMap()[i.id]||0)),od=i=>i.status==='Confirmed'&&i.due<today();
+function totals(lines,apply){let st=0,tax=0,disc=0,used=[];lines.forEach(l=>{l.amt=l.qty*l.price;st+=l.amt;tax+=l.amt*(get('taxes',l.tax)?.rate||0)/100});
+if(apply){const t=today();DB.discounts.forEach(d=>{if((d.start&&d.start>t)||(d.end&&d.end<t)||(d.limit>0&&(d.used||0)>=d.limit))return;
+const b=d.scope==='product'?lines.filter(l=>l.pid===d.target):lines,amt=b.reduce((a,l)=>a+l.amt,0),q=b.reduce((a,l)=>a+l.qty,0);
+if(!b.length||amt<(d.minAmt||0)||q<(d.minQty||0))return;disc+=Math.min(amt,d.kind==='percent'?amt*d.value/100:d.value);used.push(d.id)})}
+disc=Math.min(disc,st);tax*=st?(st-disc)/st:1;return{st,disc,tax,total:st-disc+tax,used}}
+function mkInv(s,p,key){const lines=s.lines.map(l=>({...l})),t=totals(lines,true);t.used.forEach(id=>{const d=get('discounts',id);d.used=(d.used||0)+1});
+DB.invoices.push({id:uid(),no:'INV-'+String(++DB.n.inv).padStart(5,'0'),key,sid:s.id,cust:s.cust,date:s.next,due:addD(s.next,{'Immediate':0,'15 days':15,'30 days':30}[s.terms]||0),lines,st:t.st,disc:t.disc,tax:t.tax,total:t.total,status:'Draft',sent:false})}
+function runBilling(){const t0=performance.now();let n=0;const t=today();DB.subs.forEach(s=>{if(s.status!=='Active'||s.paused)return;const p=get('plans',s.plan);let g=0;
+while(s.next<=t&&(!s.exp||s.next<=s.exp)&&g++<24){const k=s.id+':'+s.next;if(!DB.invoices.some(i=>i.key===k)){mkInv(s,p,k);n++}s.next=addP(s.next,p.period)}});
+save();msg=n?n+' invoice'+(n>1?'s':'')+' created in '+Math.round(performance.now()-t0)+' ms. Nothing is billed twice.':'No subscriptions are due for billing.';render()}
+function demo(){const t0=performance.now(),p=DB.plans[0],pr=DB.products[0];if(!p||!pr||!DB.taxes[0]){msg='Add a product, plan and tax first.';render();return}
+const cs=[],ov=opts(pr);for(let i=0;i<100;i++){const u={id:uid(),name:'Demo Customer '+(i+1),email:'demo'+uid()+'@example.com',h:'x',role:'customer',co:'Demo Co '+(i+1)};DB.users.push(u);cs.push(u.id)}
+for(let i=0;i<2000;i++){const o=ov[i%ov.length],d=addD(today(),-(i%40));DB.subs.push({id:uid(),no:'SUB-'+String(++DB.n.sub).padStart(4,'0'),cust:cs[i%100],plan:p.id,start:d,exp:'',terms:['Immediate','15 days','30 days'][i%3],valid:'',lines:[{pid:pr.id,v:o.l,qty:1+i%5,tax:DB.taxes[0].id,price:pr.sale+o.x}],status:'Active',next:d,paused:false})}
+save();msg='Added 2,000 demo subscriptions in '+Math.round(performance.now()-t0)+' ms. Now open Invoices and press Run billing.';render()}
+function autoClose(){let c=0;DB.subs.forEach(s=>{const p=get('plans',s.plan);if(s.status==='Active'&&p?.autoClose&&((p.end&&p.end<today())||(s.exp&&s.exp<today()))){s.status='Closed';c=1}});if(c)save()}
+
+/* ---- auth ---- */
+function seed(){Promise.resolve().then(()=>{DB={users:[],products:[{id:'p1',name:'Brightloop CRM',type:'Service',sale:1000,cost:400,notes:'',variants:'Brand:Odoo:560, Brand:Zoho:300'}],plans:[{id:'pl1',name:'Monthly Standard',price:1000,period:'monthly',minQty:1,start:today(),end:'',autoClose:true,closable:true,pausable:true,renewable:true}],templates:[],taxes:[{id:'t1',name:'GST 18%',rate:18}],discounts:[],subs:[],invoices:[],payments:[],resets:{},n:{sub:0,inv:0}};save();boot()})}
+function boot(){if(!DB){seed();return}me=DB.users.find(u=>u.id===R('bl_ses',null))||null;if(!DB.users.length)au='up';autoClose();render()}
+function authView(){const T={in:'Log in',up:DB.users.length?'Create account':'Create admin account',fg:'Forgot password',rs:'Set new password'}[au];
+return`<div id="auth"><b style="color:var(--pri)">◈ Brightloop</b><h1>Subscription billing, in one place.</h1><p class="mut">${T}</p>
+<div class="seg"><button class="${au==='in'?'on':''}" onclick="au='in';render()">Log in</button><button class="${au==='up'?'on':''}" onclick="au='up';render()">Sign up</button></div>
+${au==='up'?'<input id="an" placeholder="Your name"><input id="ac" placeholder="Company (optional)"><input id="aph" placeholder="Phone (optional)"><input id="aad" placeholder="Billing address (optional)">':''}
+${au==='rs'?'':'<input id="ae" type="email" placeholder="Email">'}
+${au==='fg'?'':`<input id="ap" type="password" placeholder="${au==='rs'?'New password':'Password'}">`}
+<div class="err" id="err"></div>${rl?`<div class="toast">If this email is registered, a reset link has been sent. (Demo: no mail server, so open it here) <button class="btn s" onclick="au='rs';rt=rl;rl=null;render()">Open reset link</button></div>`:''}
+<button class="btn" onclick="doAuth()">${T}</button>
+${au==='in'?'<button class="btn g" onclick="au=\'fg\';render()">Forgot password?</button>':''}
+${au==='up'?`<p class="mut">${PWMSG}</p>`:''}</div>`}
+async function doAuth(){const g=i=>($('#'+i)?.value||'').trim(),em=g('ae').toLowerCase(),pw=$('#ap')?.value||'',er=m=>{$('#err').textContent=m};
+if(au!=='rs'&&!/^\S+@\S+\.\S+$/.test(em))return er('Enter a valid email.');
+const u=DB.users.find(x=>x.email===em);
+if(au==='fg'){if(u){const k=uid()+uid();DB.resets[k]={email:em,exp:Date.now()+36e5};save();rl=k}else rl=null;render();if(!u)$('#err').textContent='If this email is registered, a reset link has been sent.';return}
+if(au==='rs'){const r=DB.resets[rt];if(!r||r.exp<Date.now())return er('This reset link has expired.');if(!pwOk(pw))return er(PWMSG);
+const x=DB.users.find(y=>y.email===r.email);x.h=await hash(x.email+':'+pw);delete DB.resets[rt];save();au='in';msg='';render();$('#err').textContent='Password updated. Please log in.';return}
+if(au==='up'){const name=g('an');if(!name)return er('Enter your name.');if(u)return er('This email already has an account.');if(!pwOk(pw))return er(PWMSG);
+DB.users.push({id:uid(),name,email:em,h:await hash(em+':'+pw),role:DB.users.length?'customer':'admin',co:g('ac'),ph:g('aph'),ad:g('aad')});save();au='in';render();$('#err').textContent='Account created. Please log in.';return}
+if(!u||u.h!==await hash(em+':'+pw))return er('Wrong email or password.');
+W('bl_ses',u.id);me=u;page=tabs()[0][0];arg=null;render()}
+function logout(){try{localStorage.removeItem('bl_ses')}catch(e){}me=null;au='in';render()}
+
+/* ---- shell ---- */
+const tabs=()=>me.role==='customer'?[['subs','My subscriptions'],['invoices','My invoices']]:[['dash','Dashboard'],['subs','Subscriptions'],['invoices','Invoices'],['payments','Payments'],['customers','Customers'],...(me.role==='admin'?[['products','Products'],['plans','Plans'],['templates','Templates'],['taxes','Taxes'],['discounts','Discounts'],['team','Staff']]:[])];
+function go(p,a){page=p;arg=a||null;pg=0;msg='';render();scrollTo(0,0)}
+function render(){const r=$('#root');if(!me){r.innerHTML=authView();return}const T=tabs();if(!T.some(t=>t[0]===page))page=T[0][0];
+r.innerHTML=`<header class="noprint"><b>◈ Brightloop</b><span class="chip">${me.role}</span><span class="sp"></span><span class="mut">${esc(me.name)}</span><button class="btn g s" onclick="logout()">Log out</button></header><nav class="noprint">${T.map(t=>`<button class="${t[0]===page?'on':''}" onclick="go('${t[0]}')">${t[1]}</button>`).join('')}</nav><main>${msg?`<div class="toast">${esc(msg)}</div>`:''}${view()}</main>`}
+function view(){if(ENT[page])return arg?entForm(page,arg==='new'?'':arg):entList(page);return({dash,subs:subsV,invoices:invV,payments:payV,customers:custV,team:teamV})[page]()}
+const vis=en=>me.role==='customer'?DB[en].filter(x=>x.cust===me.id&&(en!=='invoices'||(x.status!=='Draft'&&x.status!=='Cancelled'))):DB[en];
+
+/* ---- subscriptions ---- */
+const opts=p=>[{l:'Standard',x:0},...(p.variants||'').split(',').map(v=>v.trim()).filter(Boolean).map(v=>{const[a,b,c]=v.split(':');return{l:a+': '+(b||''),x:+c||0}})];
+function newSub(){F={cust:'',plan:DB.plans[0]?.id||'',tpl:'',start:today(),exp:'',terms:'Immediate',valid:'',lines:[]};go('subs','new')}
+function applyTpl(id){const t=get('templates',id);F.tpl=id;if(t){F.plan=t.plan;F.valid=addD(today(),t.days||0);F.lines=[[t.pid,t.qty],[t.pid2,t.qty2],[t.pid3,t.qty3]].map(([id,q])=>[get('products',id),q]).filter(x=>x[0]).map(([p,q])=>({pid:p.id,v:'Standard',qty:q||1,tax:DB.taxes[0]?.id||'',price:p.sale}))}render()}
+function setLine(i,val){const[pid,ix]=val.split('|'),p=get('products',pid),o=opts(p)[+ix];Object.assign(F.lines[i],{pid,v:o.l,price:p.sale+o.x});render()}
+function subForm(){const ls=F.lines.map((l,i)=>`<div class="row" style="margin-bottom:6px"><select onchange="setLine(${i},this.value)">${DB.products.flatMap(p=>opts(p).map((o,ix)=>`<option value="${p.id}|${ix}" ${p.id===l.pid&&o.l===l.v?'selected':''}>${esc(p.name)} — ${esc(o.l)} (${inr(p.sale+o.x)})</option>`)).join('')}</select><input type="number" min="1" value="${l.qty}" onchange="F.lines[${i}].qty=+this.value||1;render()"><select onchange="F.lines[${i}].tax=this.value;render()"><option value="">No tax</option>${DB.taxes.map(t=>`<option value="${t.id}" ${t.id===l.tax?'selected':''}>${esc(t.name)}</option>`).join('')}</select><button class="x" onclick="F.lines.splice(${i},1);render()">✕</button></div>`).join('');
+const t=totals(F.lines.map(l=>({...l})),false);
+return`<div class="top"><h2>New subscription</h2></div><div class="card"><label class="lab">Customer</label><select onchange="F.cust=this.value"><option value="">Select…</option>${DB.users.filter(u=>u.role==='customer').map(u=>`<option value="${u.id}" ${u.id===F.cust?'selected':''}>${esc(u.name)} (${esc(u.email)})</option>`).join('')}</select>
+<label class="lab">Start from a quotation template (optional)</label><select onchange="applyTpl(this.value)"><option value="">None</option>${DB.templates.map(x=>`<option value="${x.id}" ${x.id===F.tpl?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+<label class="lab">Plan</label><select onchange="F.plan=this.value">${DB.plans.map(p=>`<option value="${p.id}" ${p.id===F.plan?'selected':''}>${esc(p.name)} · ${p.period} · min qty ${p.minQty}</option>`).join('')}</select>
+<div class="fl"><div><label class="lab">Start date</label><input type="date" value="${F.start}" onchange="F.start=this.value"></div><div><label class="lab">Expiry date</label><input type="date" value="${F.exp}" onchange="F.exp=this.value"></div><div><label class="lab">Payment terms</label><select onchange="F.terms=this.value">${['Immediate','15 days','30 days'].map(x=>`<option ${x===F.terms?'selected':''}>${x}</option>`).join('')}</select></div></div>
+<h3>Lines</h3>${ls||'<p class="mut">No lines yet.</p>'}<button class="btn g s" onclick="F.lines.push({pid:DB.products[0].id,v:'Standard',qty:1,tax:DB.taxes[0]?.id||'',price:DB.products[0].sale});render()" ${DB.products.length?'':'disabled'}>＋ Add line</button>
+<div class="tot"><div>Subtotal ${inr(t.st)}</div><div>Tax ${inr(t.tax)}</div><b>Total ${inr(t.total)}</b></div><div class="err" id="err"></div><button class="btn" onclick="saveSub()">Save as draft</button><button class="btn g" onclick="go('subs')">Cancel</button></div>`}
+function saveSub(){const er=m=>{$('#err').textContent=m},p=get('plans',F.plan);
+if(!F.cust)return er('Choose a customer.');if(!p)return er('Choose a plan.');if(!F.lines.length)return er('Add at least one line.');if(!F.start)return er('Pick a start date.');
+if(F.exp&&F.exp<F.start)return er('Expiry must be after the start date.');
+if(F.lines.some(l=>l.qty<p.minQty))return er('This plan needs a minimum quantity of '+p.minQty+' per line.');
+if((p.start&&F.start<p.start)||(p.end&&F.start>p.end))return er('This plan is only available from '+(p.start||'any date')+' to '+(p.end||'no end date')+'.');
+DB.subs.push({id:uid(),no:'SUB-'+String(++DB.n.sub).padStart(4,'0'),cust:F.cust,plan:F.plan,start:F.start,exp:F.exp,terms:F.terms,valid:F.valid,lines:F.lines,status:'Draft',next:F.start,paused:false});save();go('subs')}
+function setSt(id,st){const s=get('subs',id);s.status=st;if(st==='Active')s.next=s.next||s.start;save();render()}
+function act(id,a){const s=get('subs',id),p=get('plans',s.plan);if(a==='pause')s.paused=!s.paused;else s.exp=addP(s.exp&&s.exp>=today()?s.exp:today(),p.period);save();render()}
+function subsV(){if(arg==='new')return subForm();if(arg)return subDet(arg);
+const q=(flt.sq||'').toLowerCase(),st=flt.ss||'',a=vis('subs').filter(s=>(!st||s.status===st)&&(!q||(s.no+cn(s.cust)).toLowerCase().includes(q)));
+return`<div class="top"><h2>${me.role==='customer'?'My subscriptions':'Subscriptions'}</h2>${me.role!=='customer'?'<button class="btn" onclick="newSub()">＋ New</button>':''}</div><div class="fl"><input placeholder="Search number or customer" value="${esc(flt.sq||'')}" onchange="flt.sq=this.value;pg=0;render()"><select onchange="flt.ss=this.value;pg=0;render()"><option value="">All statuses</option>${ST.map(x=>`<option ${x===st?'selected':''}>${x}</option>`).join('')}</select></div>`+
+tbl(['No','Customer','Plan','Start','Expiry','Status','Total'],pg_(a).map(s=>[`<a href="#" onclick="go('subs','${s.id}');return false">${s.no}</a>`,esc(cn(s.cust)),esc(get('plans',s.plan)?.name||'—'),s.start,s.exp||'—',chip(s.status+(s.paused?' (paused)':'')),inr(totals(s.lines.map(l=>({...l})),false).total)]))+pager(a.length)}
+function subDet(id){const s=get('subs',id),p=get('plans',s.plan),t=totals(s.lines.map(l=>({...l})),false),stf=me.role!=='customer',nx={Draft:['Quotation','Send quotation'],Quotation:['Confirmed','Confirm'],Confirmed:['Active','Activate']}[s.status];let b='';
+{if(stf&&nx)b+=`<button class="btn" onclick="setSt('${id}','${nx[0]}')">${nx[1]}</button>`;if(s.status==='Active'){if(p?.pausable)b+=`<button class="btn g" onclick="act('${id}','pause')">${s.paused?'Resume':'Pause'}</button>`;if(p?.renewable)b+=`<button class="btn g" onclick="act('${id}','renew')">Renew</button>`;if(p?.closable)b+=`<button class="btn g" onclick="setSt('${id}','Closed')">Close</button>`}}
+const ex=s.status==='Quotation'&&s.valid&&s.valid<today()?' <span class="chip red">Quote expired</span>':'',inv=DB.invoices.filter(i=>i.sid===id);
+return`<div class="top"><h2>${s.no}</h2><button class="btn g s" onclick="go('subs')">‹ Back</button></div><div class="card"><div class="steps">${ST.map(x=>`<span class="${x===s.status?'on':''}">${x}</span>`).join('')}</div>${ex}
+<div class="dl"><div><small>Customer</small>${esc(cn(s.cust))}</div><div><small>Plan</small>${esc(p?.name||'—')} (${p?.period})</div><div><small>Start</small>${s.start}</div><div><small>Expiry</small>${s.exp||'—'}</div><div><small>Payment terms</small>${s.terms}</div><div><small>Quote valid until</small>${s.valid||'—'}</div><div><small>Next billing</small>${s.status==='Active'?s.next:'—'}</div></div>${b}</div>`+
+tbl(['Product','Variant','Qty','Unit price','Tax','Amount'],s.lines.map(l=>[esc(get('products',l.pid)?.name||'—'),esc(l.v),l.qty,inr(l.price),esc(get('taxes',l.tax)?.name||'—'),inr(l.qty*l.price)]))+`<div class="card tot"><div>Subtotal ${inr(t.st)}</div><div>Tax ${inr(t.tax)}</div><b>Total per period ${inr(t.total)}</b></div><h3>Invoices</h3>`+
+tbl(['No','Date','Total','Status'],inv.filter(i=>me.role!=='customer'||i.status!=='Draft').map(i=>[`<a href="#" onclick="go('invoices','${i.id}');return false">${i.no}</a>`,i.date,inr(i.total),chip(od(i)?'Overdue':i.status)]))}
+
+/* ---- invoices & payments ---- */
+function invV(){if(arg)return invDet(arg);const st=flt.is||'',a=vis('invoices').filter(i=>!st||(st==='Overdue'?od(i):i.status===st)).sort((x,y)=>y.no.localeCompare(x.no));
+return`<div class="top"><h2>${me.role==='customer'?'My invoices':'Invoices'}</h2>${me.role!=='customer'?'<button class="btn" onclick="runBilling()">⚙ Run billing</button>':''}</div><div class="fl"><select onchange="flt.is=this.value;pg=0;render()"><option value="">All</option>${['Draft','Confirmed','Paid','Overdue','Cancelled'].map(x=>`<option ${x===st?'selected':''}>${x}</option>`).join('')}</select></div>`+
+tbl(['No','Customer','Date','Due','Total','Outstanding','Status'],pg_(a).map(i=>[`<a href="#" onclick="go('invoices','${i.id}');return false">${i.no}</a>`,esc(cn(i.cust)),i.date,i.due,inr(i.total),inr(i.status==='Cancelled'?0:out(i)),chip(od(i)?'Overdue':i.status)]))+pager(a.length)}
+function invDet(id){const i=get('invoices',id),stf=me.role!=='customer',ps=DB.payments.filter(p=>p.inv===id);let b='';
+if(stf){if(i.status==='Draft')b+=`<button class="btn" onclick="invSt('${id}','Confirmed')">Confirm</button>`;if((i.status==='Draft'||i.status==='Confirmed')&&!ps.length)b+=`<button class="btn g" onclick="invSt('${id}','Cancelled')">Cancel</button>`;if(i.status!=='Cancelled')b+=`<button class="btn g" onclick="get('invoices','${id}').sent=true;save();msg='Invoice sent to '+get('users',get('invoices','${id}').cust).email+' (demo)';render()">Send</button>`}
+b+=`<button class="btn g" onclick="window.print()">Print</button>`;
+return`<div class="top noprint"><h2>${i.no}</h2><button class="btn g s" onclick="go('invoices')">‹ Back</button></div><div class="card"><h3 style="display:none">${i.no}</h3><div class="dl"><div><small>Invoice</small>${i.no} ${chip(od(i)?'Overdue':i.status)}${i.sent?' <span class="chip">Sent</span>':''}</div><div><small>Customer</small>${esc(cn(i.cust))}${cd(i.cust)}</div><div><small>Date</small>${i.date}</div><div><small>Due</small>${i.due}</div><div><small>Subscription</small>${esc(get('subs',i.sid)?.no||'—')}</div></div><div class="noprint">${b}</div></div>`+
+tbl(['Product','Variant','Qty','Unit price','Tax','Amount'],i.lines.map(l=>[esc(get('products',l.pid)?.name||'—'),esc(l.v),l.qty,inr(l.price),esc(get('taxes',l.tax)?.name||'—'),inr(l.amt)]))+
+`<div class="card tot"><div>Subtotal ${inr(i.st)}</div>${i.disc?`<div>Discount −${inr(i.disc)}</div>`:''}<div>Tax ${inr(i.tax)}</div><b>Total ${inr(i.total)}</b><div class="mut">Paid ${inr(i.total-out(i))} · Outstanding ${inr(i.status==='Cancelled'?0:out(i))}</div></div>`+
+(ps.length?`<h3>Payments</h3>`+tbl(['Date','Method','Amount','Note'],ps.map(p=>[p.date,p.method,inr(p.amt),esc(p.note||'—')])):'')+
+(!stf&&i.status==='Confirmed'?`<div class="card noprint"><button class="btn" onclick="payNow('${id}')">Pay ${inr(out(i))} now</button> <span class="mut">Demo checkout: records an online payment.</span></div>`:'')+(stf&&i.status==='Confirmed'?`<div class="card noprint"><h3>Record payment</h3><div class="fl"><select id="pm">${['UPI','Credit card','Bank transfer','Cash','Cheque'].map(x=>`<option>${x}</option>`).join('')}</select><input id="pa" type="number" min="0" step="any" value="${out(i).toFixed(2)}"><input id="pd" type="date" value="${today()}"></div><input id="pn" placeholder="Note (optional)"><div class="err" id="err"></div><button class="btn" onclick="addPay('${id}')">Save payment</button></div>`:'')}
+function invSt(id,s){get('invoices',id).status=s;save();render()}
+function payNow(id){const i=get('invoices',id);DB.payments.push({id:uid(),inv:id,cust:i.cust,method:'Online',amt:out(i),date:today(),note:'Paid by customer in portal'});PM=null;i.status='Paid';save();msg='Payment received. Thank you!';render()}
+function addPay(id){const i=get('invoices',id),a=+$('#pa').value,er=m=>{$('#err').textContent=m};if(!(a>0))return er('Enter an amount above 0.');if(a>out(i)+.005)return er('Amount is more than the '+inr(out(i))+' outstanding.');
+DB.payments.push({id:uid(),inv:id,cust:i.cust,method:$('#pm').value,amt:a,date:$('#pd').value||today(),note:$('#pn').value.trim()});PM=null;if(out(i)<=.005)i.status='Paid';save();msg='Payment recorded.';render()}
+function payV(){const a=[...DB.payments].sort((x,y)=>y.date.localeCompare(x.date));return`<div class="top"><h2>Payments</h2></div>`+tbl(['Date','Invoice','Customer','Method','Amount','Note'],pg_(a).map(p=>[p.date,`<a href="#" onclick="go('invoices','${p.inv}');return false">${esc(get('invoices',p.inv)?.no||'—')}</a>`,esc(cn(p.cust)),p.method,inr(p.amt),esc(p.note||'—')]))+pager(a.length)}
+function custV(){const a=DB.users.filter(u=>u.role==='customer');return`<div class="top"><h2>Customers</h2></div><div class="card"><h3>Add customer</h3><div class="fl"><input id="cn_n" placeholder="Name"><input id="cn_e" type="email" placeholder="Email"><input id="cn_p" type="password" placeholder="Temporary password"></div><div class="fl"><input id="cn_c" placeholder="Company"><input id="cn_t" placeholder="Phone"><input id="cn_a" placeholder="Billing address"></div><div class="err" id="err"></div><button class="btn" onclick="addCust()">Add customer</button></div>`+tbl(['Name','Email','Subscriptions','Outstanding'],pg_(a).map(u=>[esc(u.name),esc(u.email),DB.subs.filter(s=>s.cust===u.id).length,inr(DB.invoices.filter(i=>i.cust===u.id&&i.status==='Confirmed').reduce((x,i)=>x+out(i),0))]))+pager(a.length)}
+function teamV(){const a=DB.users.filter(u=>u.role!=='customer');return`<div class="top"><h2>Staff</h2></div><div class="card"><h3>Add staff member</h3><input id="sn" placeholder="Name"><input id="se" type="email" placeholder="Email"><input id="sp" type="password" placeholder="Temporary password"><div class="err" id="err"></div><button class="btn" onclick="addStaff()">Add staff</button></div>`+tbl(['Name','Email','Role'],a.map(u=>[esc(u.name),esc(u.email),u.role]))}
+async function addCust(){const v=i=>$('#'+i).value.trim(),n=v('cn_n'),e=v('cn_e').toLowerCase(),p=$('#cn_p').value,er=m=>{$('#err').textContent=m};
+if(!n||!/^\S+@\S+\.\S+$/.test(e))return er('Enter a name and a valid email.');if(DB.users.some(u=>u.email===e))return er('This email already has an account.');if(!pwOk(p))return er(PWMSG);
+DB.users.push({id:uid(),name:n,email:e,h:await hash(e+':'+p),role:'customer',co:v('cn_c'),ph:v('cn_t'),ad:v('cn_a')});save();msg='Customer added.';render()}
+async function addStaff(){const n=$('#sn').value.trim(),e=$('#se').value.trim().toLowerCase(),p=$('#sp').value,er=m=>{$('#err').textContent=m};
+if(!n||!/^\S+@\S+\.\S+$/.test(e))return er('Enter a name and a valid email.');if(DB.users.some(u=>u.email===e))return er('This email already has an account.');if(!pwOk(p))return er(PWMSG);
+DB.users.push({id:uid(),name:n,email:e,h:await hash(e+':'+p),role:'staff'});save();msg='Staff member added.';render()}
+
+/* ---- dashboard ---- */
+function dash(){const f=flt.f||'',t=flt.t||'',rg=d=>(!f||d>=f)&&(!t||d<=t);
+const inv=DB.invoices.filter(i=>i.status!=='Cancelled'&&i.status!=='Draft'&&rg(i.date)),pay=DB.payments.filter(p=>rg(p.date)),act=DB.subs.filter(s=>s.status==='Active'&&!s.paused);
+const mrr=act.reduce((a,s)=>a+totals(s.lines.map(l=>({...l})),false).total*({daily:30,weekly:52/12,monthly:1,yearly:1/12}[get('plans',s.plan)?.period]||1),0);
+const ren=act.filter(s=>s.next<=addD(today(),7)).sort((a,b)=>a.next.localeCompare(b.next)),rev=pay.reduce((a,p)=>a+p.amt,0),owed=inv.reduce((a,i)=>a+out(i),0),ods=inv.filter(od).sort((x,y)=>x.due.localeCompare(y.due)),cnt={};DB.subs.forEach(s=>cnt[s.status]=(cnt[s.status]||0)+1);
+return`<div class="top"><h2>Dashboard</h2>${me.role==='admin'?'<button class="btn g s" onclick="demo()">Load 2,000 demo subscriptions</button>':''}</div><div class="fl"><div><label class="lab">From</label><input type="date" value="${f}" onchange="flt.f=this.value;render()"></div><div><label class="lab">To</label><input type="date" value="${t}" onchange="flt.t=this.value;render()"></div></div>
+<div class="kp"><div class="card"><small class="mut">Active subscriptions</small><b>${act.length}</b></div><div class="card"><small class="mut">Monthly recurring revenue</small><b>${inr(mrr)}</b></div><div class="card"><small class="mut">Revenue received</small><b>${inr(rev)}</b></div><div class="card"><small class="mut">Still owed</small><b>${inr(owed)}</b></div><div class="card"><small class="mut">Overdue invoices</small><b style="color:var(--red)">${ods.length}</b></div></div>
+<div class="card"><h3>Subscriptions by status</h3>${ST.map(x=>`<span class="chip" style="margin-right:6px">${x}: ${cnt[x]||0}</span>`).join('')}</div><h3>Renewals due in 7 days (${ren.length})</h3>${tbl(['Subscription','Customer','Next billing','Total'],ren.slice(0,10).map(s=>[s.no,esc(cn(s.cust)),s.next,inr(totals(s.lines.map(l=>({...l})),false).total)]))}<h3>Overdue invoices</h3>`+
+tbl(['Invoice','Customer','Due','Outstanding'],pg_(ods).map(i=>[`<a href="#" onclick="go('invoices','${i.id}');return false">${i.no}</a>`,esc(cn(i.cust)),i.due,inr(out(i))]))+pager(ods.length)}
+boot();
+</script></body></html>
