@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SubTrack – Subscription Dashboard</title>
+<style>
+:root{color-scheme:dark;--brand:#8b5cf6;--brand2:#a78bfa;--brand3:#6d28d9;--deep:#2a1065;--ink:#f4f3ff;--muted:#9795b3;--line:#262638;--bg:#08080e;--side:#0c0c15;--card:#12121c;--card2:#1a1a28;--field:#0e0e17;--red:#ff6b81;--green:#34d399;--amber:#fbbf24;--seg-s:#7c3aed;--seg-e:#d8b4fe;--glow:rgba(139,92,246,.35)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--ink);font-size:14px;line-height:1.4;min-height:100vh;
+  background:radial-gradient(900px 520px at 88% -8%,rgba(139,92,246,.20),transparent 60%),radial-gradient(700px 520px at -6% 18%,rgba(109,40,217,.16),transparent 60%),var(--bg);background-attachment:fixed}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+small{color:var(--muted);font-size:12px}
+::placeholder{color:#6f6d8c}
+:focus-visible{outline:2px solid var(--brand2);outline-offset:2px}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#2a2a40;border-radius:8px}::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- login ---------- */
+#login{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+.lhero{position:relative;overflow:hidden;color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:center;gap:18px;
+  background:radial-gradient(520px 420px at 80% 10%,rgba(168,85,247,.55),transparent 65%),radial-gradient(520px 520px at 10% 100%,rgba(109,40,217,.5),transparent 60%),#0a0714;border-right:1px solid var(--line)}
+.lhero h1{font-size:40px;line-height:1.12;letter-spacing:-1.2px;max-width:430px;background:linear-gradient(180deg,#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lhero p{color:#c4bfe6;max-width:420px}
+.lhero ul{list-style:none;display:grid;gap:10px;margin-top:8px;color:#e4e0ff}
+.lhero li:before{content:"✓";display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(139,92,246,.3);color:#e9ddff;margin-right:10px;font-size:12px}
+.lform{display:flex;flex-direction:column;justify-content:center;padding:56px;max-width:460px;width:100%;margin:0 auto}
+.lform h2{font-size:26px;margin-bottom:4px}
+.lform p{color:var(--muted);margin-bottom:22px}
+.lform input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;margin-bottom:12px;background:var(--field)}
+.lform input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(139,92,246,.2);outline:0}
+.err{color:var(--red);font-size:13px;min-height:18px;margin-bottom:8px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:-.5px}
+.logo i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#fff;display:grid;place-items:center;font-style:normal;font-size:16px;box-shadow:0 0 22px var(--glow)}
+.logo .lt{font-style:normal}
+.logo span{color:var(--brand2)}
+.lhero .logo{margin-bottom:24px}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card2);font-weight:600;font-size:13px;transition:.15s}
+.btn:hover{border-color:#3a3a58;background:#20202f}
+.btn.pri{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:transparent;color:#fff;box-shadow:0 6px 20px rgba(109,40,217,.45)}
+.btn.pri:hover{filter:brightness(1.12);box-shadow:0 8px 26px rgba(139,92,246,.55)}
+.btn.wide{width:100%;padding:12px;margin-top:6px}
+.btn.light{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff;width:100%}
+.btn.light:hover{background:rgba(255,255,255,.24)}
+.btn:disabled{opacity:.5;cursor:default}
+.link{background:none;border:0;color:var(--brand2);font-weight:600;font-size:12px;padding:0}
+.ib{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted)}
+.ib:hover{background:#242438;color:#fff;border-color:var(--brand)}
+
+/* ---------- shell ---------- */
+#shell{display:none;min-height:100vh}
+#shell.on{display:grid;grid-template-columns:240px 1fr}
+.side{background:var(--side);border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.side .logo{padding:0 8px;margin-bottom:14px}
+.search{position:relative;margin-bottom:10px}
+.search input{width:100%;padding:9px 12px 9px 32px;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+.search input:focus{border-color:var(--brand);outline:0}
+.search:before{content:"⌕";position:absolute;left:11px;top:6px;color:var(--muted);font-size:16px}
+.grp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6d6b8a;padding:10px 10px 4px}
+.nv{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:none;border-radius:10px;text-align:left;color:#b6b4d0;position:relative}
+.nv:hover{background:rgba(255,255,255,.05);color:#fff}
+.nv.on{background:linear-gradient(90deg,rgba(139,92,246,.28),rgba(139,92,246,.06));color:#fff;font-weight:700}
+.nv.on:before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--brand2);box-shadow:0 0 12px var(--brand)}
+.nv .g{width:20px;text-align:center}
+.bd{margin-left:auto;background:#222235;color:#c9c7e3;border-radius:10px;font-size:11px;padding:1px 8px;font-weight:600}
+.bd.hot{background:var(--red);color:#fff}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#fff;display:grid;place-items:center;font-weight:700}
+.me b{display:block;font-size:13px}
+.me button{margin-left:auto}
+
+main{padding:28px 32px 40px;min-width:0}
+.page{display:none}
+.page.on{display:block}
+.head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.head h1{font-size:24px;letter-spacing:-.5px}
+.head p{color:var(--muted)}
+.hb{display:flex;gap:10px}
+
+.card{background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)),var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;min-width:0;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:#34344f}
+.card h3{font-size:15px;margin-bottom:2px}
+.card .sub{color:var(--muted);font-size:12.5px;margin-bottom:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.g2{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px}
+.g2b{display:grid;grid-template-columns:1fr 1.5fr;gap:16px;margin-bottom:16px}
+.k .lbl{display:flex;align-items:center;gap:8px;color:var(--muted);font-weight:600;font-size:13px}
+.k .big{font-size:30px;font-weight:800;letter-spacing:-.9px;margin:8px 0 2px;background:linear-gradient(180deg,#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+.spark{width:100%;height:56px;margin-top:6px;display:block}
+.prog{height:8px;background:#242438;border-radius:6px;overflow:hidden;margin:14px 0 8px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,#6d28d9,#a78bfa);border-radius:6px;box-shadow:0 0 12px rgba(139,92,246,.6)}
+.prog i.over{background:linear-gradient(90deg,#e11d48,#ff6b81);box-shadow:0 0 12px rgba(255,107,129,.5)}
+.bl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);gap:8px}
+.bl b{color:var(--ink)}
+.ai-card{position:relative;overflow:hidden;background:radial-gradient(300px 200px at 90% 0%,rgba(236,180,255,.45),transparent 60%),linear-gradient(160deg,#2a1065,#7c3aed);color:#fff;border:1px solid rgba(196,181,253,.35);display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 10px 34px rgba(109,40,217,.35)}
+.ai-card:hover{border-color:rgba(216,200,255,.6)}
+.ai-card b{font-size:15px}
+.ai-card p{color:#e0d8ff;font-size:12.5px}
+
+/* renewals + rows */
+.ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-weight:800;flex:none}
+.rn{display:grid;grid-template-columns:38px 1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.rn:first-of-type{border-top:0}
+.rn b{display:block}
+.amt{text-align:right;font-weight:700}
+.per{font-weight:500;color:var(--muted);font-size:12px}
+.chip{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11.5px;font-weight:600;background:rgba(255,255,255,.07);color:#b6b4d0}
+.chip.red{background:rgba(255,107,129,.15);color:#ff8fa0}
+.chip.amber{background:rgba(251,191,36,.14);color:#fbbf24}
+.chip.green{background:rgba(52,211,153,.14);color:#34d399}
+.chip.blue{background:rgba(139,92,246,.2);color:#d4c6ff}
+.empty{color:var(--muted);text-align:center;padding:28px 12px}
+
+/* donut + legend */
+.donutwrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+.donut{width:190px;height:190px;filter:drop-shadow(0 0 18px rgba(139,92,246,.35))}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;font-size:12.5px;color:#c9c7e3}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* forecast */
+.fc{display:flex;align-items:flex-end;gap:12px;height:200px;padding-top:8px}
+.fcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px;min-width:0}
+.fcol .v{font-size:11px;color:#d9d6f2;font-weight:600;white-space:nowrap}
+.fcol .m{font-size:12px;color:var(--muted)}
+.fcol.now .m{color:var(--brand2);font-weight:700}
+.stack{width:100%;max-width:52px;display:flex;flex-direction:column-reverse;border-radius:8px 8px 4px 4px;overflow:hidden;background:#1d1d2c}
+.seg.s{background:linear-gradient(180deg,#8b5cf6,var(--seg-s))}
+.seg.e{background:var(--seg-e)}
+.fcol.now .seg.s{background:linear-gradient(180deg,#c4b5fd,#8b5cf6);box-shadow:0 0 18px rgba(167,139,250,.6)}
+.keys{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:10px}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.keys i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* bars */
+.bar{margin-bottom:14px}
+.bar .row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:#d9d6f2}
+.track{height:9px;background:#242438;border-radius:6px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#6d28d9,#a78bfa);border-radius:6px;box-shadow:0 0 10px rgba(139,92,246,.5)}
+.emi{padding:10px 0;border-top:1px solid var(--line)}
+.emi .bl{margin-bottom:4px;color:var(--ink)}
+.emi .prog{margin:6px 0 0}
+
+/* subscriptions table */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tools input{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--field);min-width:200px;flex:1;max-width:320px}
+.tools input:focus{border-color:var(--brand);outline:0}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pills button{padding:7px 13px;border:1px solid var(--line);background:var(--card);border-radius:18px;font-size:13px;color:#b6b4d0}
+.pills button:hover{border-color:var(--brand)}
+.pills button.on{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(109,40,217,.45)}
+.thead,.trow{display:grid;grid-template-columns:40px 1.6fr 1.3fr 1fr 1.1fr 78px;gap:14px;align-items:center}
+.thead{padding:0 6px 10px;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.trow{padding:12px 6px;border-top:1px solid var(--line);border-radius:8px}
+.trow:hover{background:rgba(139,92,246,.06)}
+.trow b{display:block}
+.tx{display:flex;gap:6px;justify-content:flex-end}
+
+/* stats */
+.stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-.7px;margin-top:4px;background:linear-gradient(180deg,#fff,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+
+/* notifications */
+.nt{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line);align-items:flex-start}
+.nt:first-of-type{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
+.dot.red{background:var(--red);box-shadow:0 0 10px var(--red)}.dot.amber{background:var(--amber);box-shadow:0 0 10px var(--amber)}.dot.blue{background:var(--brand2);box-shadow:0 0 10px var(--brand)}
+
+/* ai */
+.aigrid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chips button{border:1px solid var(--line);background:var(--card2);border-radius:18px;padding:7px 12px;font-size:13px;color:#d4d2ee}
+.chips button:hover{border-color:var(--brand);background:rgba(139,92,246,.14);color:#fff}
+#chat{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;max-height:52vh;overflow:auto;padding-right:4px}
+.msg{padding:11px 14px;border-radius:14px;max-width:86%;line-height:1.45;white-space:pre-wrap}
+.msg.me{align-self:flex-end;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border-bottom-right-radius:4px;box-shadow:0 4px 16px rgba(109,40,217,.35)}
+.msg.bot{align-self:flex-start;background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;padding:12px;border:1px solid var(--line);border-radius:10px;min-width:0;background:var(--field)}
+.ask input:focus{border-color:var(--brand);outline:0}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 11px;border-radius:14px;background:var(--card2);border:1px solid var(--line);margin-bottom:14px}
+.pill i{width:8px;height:8px;border-radius:50%;background:#6d6b8a;display:inline-block}
+.pill.ok i{background:#34d399;box-shadow:0 0 8px #34d399}
+.pill.bad i{background:var(--red);box-shadow:0 0 8px var(--red)}
+.set label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.set input,.set select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--field)}
+.set input:focus,.set select:focus{border-color:var(--brand);outline:0}
+.set .row2{display:flex;gap:8px}
+.set .row2 select{flex:1;min-width:0}
+.set h4{font-size:13px;margin-top:16px}
+.set .hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+.set code{background:#22223a;color:#d4c6ff;border-radius:5px;padding:1px 5px;font-size:11.5px;word-break:break-all}
+
+/* modals */
+.shade{display:none;position:fixed;inset:0;background:rgba(3,3,8,.75);backdrop-filter:blur(6px);z-index:50;align-items:center;justify-content:center;padding:16px}
+.shade.open{display:flex}
+.sheet{background:var(--card);border:1px solid #34344f;border-radius:18px;width:100%;max-width:440px;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(109,40,217,.2)}
+.sheet h3{margin-bottom:14px;font-size:17px}
+.sheet input,.sheet select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--field);margin-bottom:10px}
+.sheet input:focus,.sheet select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(139,92,246,.2);outline:0}
+.lab{display:block;font-size:12px;color:var(--muted);margin:0 0 4px 2px}
+.note{display:block;color:var(--muted);font-size:12px;margin:-4px 0 10px 2px}
+.emiprev{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.35);border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:10px;color:#e4dbff}
+.cancel{background:none;border:0;color:var(--muted);width:100%;padding:11px}
+.cancel:hover{color:#fff}
+
+/* mobile nav */
+.mnav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(12,12,21,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line);z-index:20}
+.mnav button{flex:1;padding:9px 0 11px;border:0;background:none;color:var(--muted);font-size:11px;position:relative}
+.mnav button.on{color:var(--brand2);font-weight:700}
+.mnav i{display:block;font-style:normal;font-size:18px}
+
+@media(max-width:1180px){.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:980px){.g2,.g2b,.aigrid{grid-template-columns:1fr}}
+@media(max-width:860px){
+  #shell.on{display:block}
+  .side{display:none}
+  .mnav{display:flex}
+  main{padding:18px 14px 90px}
+  #login{grid-template-columns:1fr}
+  .lhero{display:none}
+  .lform{padding:36px 24px}
+  .thead{display:none}
+  .trow{grid-template-columns:40px 1fr auto;grid-template-areas:"i n a" "i p d" "x x x"}
+  .trow>:nth-child(1){grid-area:i}.trow>:nth-child(2){grid-area:n}.trow>:nth-child(3){grid-area:p}
+  .trow>:nth-child(4){grid-area:a;text-align:right}.trow>:nth-child(5){grid-area:d;text-align:right}.trow>:nth-child(6){grid-area:x}
+  .rn{grid-template-columns:38px 1fr auto}
+  .rn .ra{display:none}
+  .shade{align-items:flex-end;padding:0}
+  .sheet{border-radius:20px 20px 0 0;max-width:none}
+}
+@media(max-width:520px){.g4{grid-template-columns:1fr}.hb .btn span{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lhero">
+    <div class="logo"><i>S</i><em class="lt">Sub<span>Track</span></em></div>
+    <h1>Know what you pay, before it renews.</h1>
+    <p>One dashboard for every subscription, card payment and EMI, with your monthly expense always up to date.</p>
+    <ul>
+      <li>Monthly expense and 6-month forecast</li>
+      <li>Online payment, credit card and EMI tracking</li>
+      <li>Ask AI about your spending</li>
+    </ul>
+  </div>
+  <div class="lform">
+    <h2>Welcome</h2>
+    <p>Log in, or enter your details to create an account.</p>
+    <input id="lname" placeholder="Your name" onkeydown="if(event.key==='Enter')login()">
+    <input id="lemail" type="email" placeholder="Email" onkeydown="if(event.key==='Enter')login()">
+    <input id="lpass" type="password" placeholder="Password (min 4 characters)" onkeydown="if(event.key==='Enter')login()">
+    <div class="err" id="lerr"></div>
+    <button class="btn pri wide" onclick="login()">Log in / Sign up</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="shell">
+  <aside class="side">
+    <div class="logo"><i>S</i><em class="lt">Sub<span>Track</span></em></div>
+    <div class="search"><input id="gs" placeholder="Search subscriptions" oninput="setSearch(this.value)" aria-label="Search"></div>
+    <div class="grp">Dashboard</div>
+    <button class="nv on" data-page="overview" onclick="show('overview')"><span class="g">▦</span>Overview</button>
+    <button class="nv" data-page="subs" onclick="show('subs')"><span class="g">☰</span>Subscriptions<span class="bd" id="bSubs">0</span></button>
+    <button class="nv" data-page="analytics" onclick="show('analytics')"><span class="g">📊</span>Analytics</button>
+    <button class="nv" data-page="notes" onclick="show('notes')"><span class="g">🔔</span>Notifications<span class="bd" id="bNotes" style="display:none">0</span></button>
+    <div class="grp">Assistant</div>
+    <button class="nv" data-page="ai" onclick="show('ai')"><span class="g">✦</span>Ask AI</button>
+    <div class="me">
+      <div class="av" id="avatar">U</div>
+      <div><b id="who"></b><small>Signed in</small></div>
+      <button class="btn" onclick="logout()" style="padding:6px 10px">Log out</button>
+    </div>
+  </aside>
+
+  <main>
+    <!-- OVERVIEW -->
+    <section id="p-overview" class="page on">
+      <div class="head">
+        <div><h1>Overview</h1><p>Welcome back, <span id="who2"></span></p></div>
+        <div class="hb">
+          <button class="btn" onclick="openBudget()">⚙ <span>Manage Budget</span></button>
+          <button class="btn pri" onclick="openSheet()">＋ <span>New Subscription</span></button>
+        </div>
+      </div>
+
+      <div class="g4">
+        <div class="card k">
+          <div class="lbl">Monthly Expense</div>
+          <div class="big" id="kMonth">₹0</div>
+          <small id="kMonthSub"></small>
+          <div id="kSpark"></div>
+        </div>
+        <div class="card k">
+          <div class="lbl">Active Subscriptions</div>
+          <div class="big" id="kActive">0</div>
+          <small id="kActiveSub"></small>
+          <div id="kBudget"></div>
+        </div>
+        <div class="card k">
+          <div class="lbl">Potential Savings</div>
+          <div class="big" id="kSave">₹0</div>
+          <small id="kSaveSub"></small>
+          <div style="margin-top:16px"><button class="btn wide" onclick="show('ai');ask('How can I save money on my subscriptions?')">View Suggestions</button></div>
+        </div>
+        <div class="card ai-card">
+          <div><b>✦ Smart Recommendations</b><p>AI looks at your subscriptions, cards and EMIs and suggests where to cut.</p></div>
+          <button class="btn light" onclick="show('ai');ask('Which subscription should I cancel?')">Begin Analysis</button>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <h3>Upcoming Renewals</h3>
+          <div class="sub">Your next payments, soonest first</div>
+          <div id="renewals"></div>
+          <button class="btn wide" onclick="show('subs')"><span>View All Subscriptions (<b id="vAll">0</b>)</span></button>
+        </div>
+        <div class="card">
+          <h3>Spending by Category</h3>
+          <div class="sub">Your monthly expense by category</div>
+          <div class="donutwrap" id="donutBox"></div>
+        </div>
+      </div>
+
+      <div class="g2b">
+        <div class="card">
+          <h3>Payment Methods</h3>
+          <div class="sub">How your monthly expense is paid</div>
+          <div id="payOv"></div>
+          <div id="emiList"></div>
+        </div>
+        <div class="card">
+          <h3>Monthly Forecast</h3>
+          <div class="sub">Expected payments for the next 6 months</div>
+          <div id="fcOv"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUBSCRIPTIONS -->
+    <section id="p-subs" class="page">
+      <div class="head">
+        <div><h1>Subscriptions</h1><p id="subsCount"></p></div>
+        <div class="hb"><button class="btn pri" onclick="openSheet()">＋ <span>New Subscription</span></button></div>
+      </div>
+      <div class="tools">
+        <input id="ts" placeholder="Search by name or category" oninput="setSearch(this.value)" aria-label="Search subscriptions">
+        <div class="pills" id="payPills">
+          <button class="on" data-f="all" onclick="setPay('all')">All</button>
+          <button data-f="online" onclick="setPay('online')">Online</button>
+          <button data-f="card" onclick="setPay('card')">Credit card</button>
+          <button data-f="emi" onclick="setPay('emi')">EMI</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="thead"><span></span><span>Name</span><span>Payment</span><span>Amount</span><span>Next due</span><span></span></div>
+        <div id="subsList"></div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <section id="p-analytics" class="page">
+      <div class="head"><div><h1>Analytics</h1><p>Your monthly expenses in detail</p></div></div>
+      <div class="g4">
+        <div class="card stat"><small>Monthly expense</small><b id="sMonth">₹0</b></div>
+        <div class="card stat"><small>Yearly estimate</small><b id="sYear">₹0</b></div>
+        <div class="card stat"><small>EMI per month</small><b id="sEmi">₹0</b></div>
+        <div class="card stat"><small>Next renewal</small><b id="sNext" style="font-size:18px">–</b></div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <h3>Monthly Forecast</h3>
+        <div class="sub">Subscriptions and EMIs for the next 6 months</div>
+        <div id="fcAn"></div>
+      </div>
+      <div class="g2b" style="grid-template-columns:1fr 1fr">
+        <div class="card"><h3>By payment method</h3><div class="sub">Monthly amounts</div><div id="payBars"></div></div>
+        <div class="card"><h3>By category</h3><div class="sub">Monthly amounts</div><div id="catBars"></div></div>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section id="p-notes" class="page">
+      <div class="head"><div><h1>Notifications</h1><p>Renewals, overdue payments and budget alerts</p></div></div>
+      <div class="card" id="notesList"></div>
+    </section>
+
+    <!-- AI -->
+    <section id="p-ai" class="page">
+      <div class="head"><div><h1>Ask AI</h1><p>Get advice based on your own subscriptions</p></div>
+        <div class="hb"><button class="btn" onclick="clearChat()">Clear chat</button></div></div>
+      <div class="aigrid">
+        <div class="card">
+          <div class="chips">
+            <button onclick="ask('Which subscription should I cancel?')">Which to cancel?</button>
+            <button onclick="ask('How can I save money on my subscriptions?')">Save money</button>
+            <button onclick="ask('Which subscriptions renew soon?')">Renewing soon</button>
+            <button onclick="ask('What is my monthly expense?')">Monthly expense</button>
+            <button onclick="ask('Show my EMI and card payments')">EMI &amp; cards</button>
+          </div>
+          <div id="chat"></div>
+          <div class="ask">
+            <input id="q" placeholder="Ask about your spending" onkeydown="if(event.key==='Enter')ask()">
+            <button class="btn pri" id="sendBtn" onclick="ask()">Send</button>
+          </div>
+        </div>
+        <div class="card set">
+          <h3>AI settings</h3>
+          <div class="sub">Built-in AI works instantly. Open-source models like Llama 3.2 are optional.</div>
+          <span class="pill" id="pill"><i></i><span id="pillTxt">Checking…</span></span>
+          <label for="modeSel">Mode</label>
+          <select id="modeSel" onchange="setMode(this.value)">
+            <option value="auto">Auto: Llama 3.2 if running, else built-in</option>
+            <option value="webllm">Open-source AI in browser (WebLLM)</option>
+            <option value="ollama">Llama 3.2 (Ollama) only</option>
+            <option value="custom">My own AI API</option>
+            <option value="builtin">Built-in only</option>
+          </select>
+          <label for="modelSel">Ollama model</label>
+          <div class="row2"><select id="modelSel" onchange="setModel(this.value)"></select><button class="btn" onclick="checkOllama()">Refresh</button></div>
+          <label for="urlIn">Ollama URL</label>
+          <input id="urlIn" placeholder="http://localhost:11434">
+          <h4>Open-source AI in your browser</h4>
+          <label for="wlSel">Model (Llama 3.2, Qwen, SmolLM)</label>
+          <div class="row2"><select id="wlSel" onchange="setWl(this.value)"></select><button class="btn" onclick="loadWl()">Load</button></div>
+          <div class="prog" id="wlProg" style="display:none"><i id="wlBar" style="width:0%"></i></div>
+          <p class="hint" id="wlTxt">No key or install needed. Runs privately on your device using WebGPU (Chrome or Edge). The first load downloads roughly 0.5–2 GB, then it is cached.</p>
+          <h4>Open models via API (OpenAI-style)</h4>
+          <label for="apiPreset">Provider preset</label>
+          <select id="apiPreset" onchange="applyPreset(this.value)">
+            <option value="">Custom</option>
+            <option value="https://openrouter.ai/api/v1/chat/completions">OpenRouter (Llama, Mistral, Qwen)</option>
+            <option value="https://router.huggingface.co/v1/chat/completions">Hugging Face</option>
+            <option value="https://api.groq.com/openai/v1/chat/completions">Groq (Llama)</option>
+          </select>
+          <label for="apiUrl">API URL</label>
+          <input id="apiUrl" placeholder="https://yoursite.com/v1/chat/completions">
+          <label for="apiKey">API key (optional)</label>
+          <input id="apiKey" type="password" placeholder="Free key from the provider · stored in this browser only">
+          <label for="apiModel">Model name (optional)</label>
+          <input id="apiModel" placeholder="e.g. my-model">
+          <button class="btn pri wide" onclick="saveUrl()">Save settings</button>
+          <p class="hint">To run Llama 3.2: install Ollama, run <code>ollama pull llama3.2</code>, and allow this page with <code>OLLAMA_ORIGINS=*</code>, then restart Ollama.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="mnav">
+    <button class="on" data-page="overview" onclick="show('overview')"><i>▦</i>Overview</button>
+    <button data-page="subs" onclick="show('subs')"><i>☰</i>Subs</button>
+    <button data-page="analytics" onclick="show('analytics')"><i>📊</i>Analytics</button>
+    <button data-page="notes" onclick="show('notes')"><i>🔔</i>Alerts</button>
+    <button data-page="ai" onclick="show('ai')"><i>✦</i>Ask AI</button>
+  </nav>
+</div>
+
+<!-- ADD / EDIT -->
+<div class="shade" id="shade" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
+    <h3 id="sTitle">Add subscription</h3>
+    <input id="fName" placeholder="Name (e.g. Netflix)">
+    <select id="fCat" aria-label="Category">
+      <option>Entertainment</option><option>Software</option><option>Shopping</option>
+      <option>Education</option><option>Utilities</option><option>Other</option>
+    </select>
+    <label class="lab" for="fPay">Payment method</label>
+    <select id="fPay" onchange="syncForm()">
+      <option value="online">Online payment (UPI / Net banking)</option>
+      <option value="card">Credit card</option>
+      <option value="emi">Monthly EMI</option>
+    </select>
+    <div id="gCard">
+      <input id="fCard" inputmode="numeric" maxlength="4" placeholder="Card last 4 digits (optional)">
+      <small class="note">Never enter your full card number here.</small>
+    </div>
+    <div id="gCycle">
+      <label class="lab" for="fCycle">Billing</label>
+      <select id="fCycle"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select>
+    </div>
+    <div id="gPlain"><input id="fPrice" type="number" min="1" placeholder="Price (₹)"></div>
+    <div id="gEmi">
+      <input id="fTotal" type="number" min="1" placeholder="Total amount (₹)" oninput="emiPrev()">
+      <input id="fTenure" type="number" min="1" max="120" placeholder="Number of months (e.g. 12)" oninput="emiPrev()">
+      <input id="fRate" type="number" min="0" step="0.1" placeholder="Interest % per year (0 = no-cost EMI)" oninput="emiPrev()">
+      <input id="fPaid" type="number" min="0" placeholder="EMIs already paid (default 0)" oninput="emiPrev()">
+      <div class="emiprev" id="emiPrev"></div>
+    </div>
+    <label class="lab" for="fDate" id="dateLab">Next renewal date</label>
+    <input id="fDate" type="date">
+    <div class="err" id="ferr"></div>
+    <button class="btn pri wide" onclick="save()">Save</button>
+    <button class="cancel" onclick="closeSheet()">Cancel</button>
+  </div>
+</div>
+
+<!-- BUDGET -->
+<div class="shade" id="bshade" onclick="if(event.target===this)closeBudget()">
+  <div class="sheet">
+    <h3>Monthly budget</h3>
+    <p style="color:var(--muted);margin-bottom:12px">Set how much you want to spend on subscriptions, cards and EMIs each month.</p>
+    <input id="bIn" type="number" min="1" placeholder="Amount (₹)">
+    <div class="err" id="berr"></div>
+    <button class="btn pri wide" onclick="saveBudget()">Save budget</button>
+    <button class="btn wide" onclick="clearBudget()">Remove budget</button>
+    <button class="cancel" onclick="closeBudget()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let subs = [], editId = null, user = null, budget = 0, fq = '', fpay = 'all';
+
+/* ---------- storage ---------- */
+const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+/* ---------- auth ---------- */
+function login() {
+  const name = $('lname').value.trim(), email = $('lemail').value.trim().toLowerCase(), pass = $('lpass').value;
+  if (!email.includes('@') || pass.length < 4) { $('lerr').textContent = 'Enter a valid email and a password of 4+ characters.'; return; }
+  const users = read('st_users', {});
+  if (users[email]) {
+    if (users[email].pass !== pass) { $('lerr').textContent = 'Wrong password for this email.'; return; }
+  } else {
+    if (!name) { $('lerr').textContent = 'New account: please enter your name.'; return; }
+    users[email] = { name, pass }; write('st_users', users);
+  }
+  write('st_session', email); start(email);
+}
+function logout() { localStorage.removeItem('st_session'); location.reload(); }
+function start(email) {
+  user = email;
+  const u = read('st_users', {})[email];
+  $('who').textContent = u.name; $('who2').textContent = u.name;
+  $('avatar').textContent = u.name[0].toUpperCase();
+  subs = read('st_subs_' + email, []).map(x => Object.assign({ pay: 'online', cycle: 'monthly' }, x));
+  budget = read('st_budget_' + email, 0);
+  $('login').style.display = 'none'; $('shell').classList.add('on');
+  show('overview'); render();
+}
+
+/* ---------- navigation ---------- */
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + id));
+  document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('on', b.dataset.page === id));
+  if (id === 'ai') checkOllama();
+  window.scrollTo(0, 0);
+}
+function setSearch(v) {
+  fq = v.trim().toLowerCase();
+  $('gs').value = v; $('ts').value = v;
+  if (!document.getElementById('p-subs').classList.contains('on')) show('subs');
+  renderSubs();
+}
+function setPay(f) {
+  fpay = f;
+  document.querySelectorAll('#payPills button').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  renderSubs();
+}
+
+/* ---------- helpers ---------- */
+const daysLeft = d => Math.ceil((new Date(d + 'T00:00:00') - new Date().setHours(0,0,0,0)) / 864e5);
+const money = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const label = n => n < 0 ? 'Overdue by ' + (-n) + ' days' : n === 0 ? 'Renews today' : n + ' days left';
+const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+const ICOLORS = ['#a78bfa', '#ff6b81', '#34d399', '#fbbf24', '#38bdf8', '#e879f9'];
+const colorOf = n => ICOLORS[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % ICOLORS.length];
+const icon = s => `<div class="ic" style="background:${colorOf(s.name)}2e;color:${colorOf(s.name)}">${esc(s.name[0].toUpperCase())}</div>`;
+
+/* ---------- payments & expense maths ---------- */
+function emiCalc(total, n, rate) {
+  if (!(total > 0) || !(n > 0)) return 0;
+  const r = (rate || 0) / 1200;
+  return r > 0 ? total * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) : total / n;
+}
+const emiLeft = s => s.pay === 'emi' ? Math.max(0, s.tenure - (s.paid || 0)) : 0;
+const isActive = s => !(s.pay === 'emi' && emiLeft(s) === 0);
+const monthlyNow = s => s.pay === 'emi' ? (emiLeft(s) > 0 ? s.price : 0) : (s.cycle === 'yearly' ? s.price / 12 : s.price);
+const monthlyTotal = () => subs.reduce((t, s) => t + monthlyNow(s), 0);
+const payText = s => s.pay === 'card' ? 'Credit card' + (s.card ? ' ••' + s.card : '') : s.pay === 'emi' ? 'EMI ' + Math.min(s.tenure, s.paid || 0) + '/' + s.tenure + ' paid' : 'Online payment';
+const perText = s => s.cycle === 'yearly' ? '/yr' : '/mo';
+
+function projection() {
+  const now = new Date(), cur = now.getFullYear() * 12 + now.getMonth(), out = [];
+  for (let k = 0; k < 6; k++) {
+    const t = cur + k; let sum = 0, emi = 0;
+    subs.forEach(s => {
+      const dm = +s.date.slice(5, 7) - 1, dy = +s.date.slice(0, 4);
+      if (s.pay === 'emi') {
+        const start = Math.max(dy * 12 + dm, cur), d = t - start;
+        if (d >= 0 && d < emiLeft(s)) { sum += s.price; emi += s.price; }
+      } else if (s.cycle === 'yearly') { if (t % 12 === dm) sum += s.price; }
+      else sum += s.price;
+    });
+    out.push({ label: new Date(Math.floor(t / 12), t % 12, 1).toLocaleString('en-IN', { month: 'short' }), v: sum, emi });
+  }
+  return out;
+}
+function savings() {
+  const by = {};
+  subs.forEach(s => { if (s.pay !== 'emi') (by[s.cat] = by[s.cat] || []).push(s); });
+  let tot = 0, n = 0;
+  Object.values(by).forEach(a => { if (a.length > 1) { a.sort((x, y) => monthlyNow(x) - monthlyNow(y)); tot += monthlyNow(a[0]); n++; } });
+  return { tot, n };
+}
+function alerts() {
+  const a = [];
+  subs.forEach(s => {
+    if (!isActive(s)) return;
+    const d = daysLeft(s.date);
+    if (d < 0) a.push({ t: 'red', h: s.name + ' is overdue', p: 'Was due ' + fmtDate(s.date) + ' · ' + money(s.price) + ' · ' + payText(s) });
+    else if (d <= 7) a.push({ t: 'amber', h: s.name + ' renews ' + (d === 0 ? 'today' : 'in ' + d + ' day' + (d > 1 ? 's' : '')), p: money(s.price) + ' · ' + payText(s) });
+    if (s.pay === 'emi') { const l = emiLeft(s); if (l > 0 && l <= 2) a.push({ t: 'blue', h: s.name + ' EMI ending soon', p: l + ' instalment' + (l > 1 ? 's' : '') + ' left' }); }
+  });
+  const mt = monthlyTotal();
+  if (budget > 0 && mt > budget) a.unshift({ t: 'red', h: 'Over budget', p: 'Monthly expense ' + money(mt) + ' is above your ' + money(budget) + ' budget' });
+  return a;
+}
+
+/* ---------- add / edit ---------- */
+function syncForm() {
+  const p = $('fPay').value;
+  $('gCard').style.display = p === 'card' ? 'block' : 'none';
+  $('gCycle').style.display = p === 'emi' ? 'none' : 'block';
+  $('gPlain').style.display = p === 'emi' ? 'none' : 'block';
+  $('gEmi').style.display = p === 'emi' ? 'block' : 'none';
+  $('dateLab').textContent = p === 'emi' ? 'Next EMI due date' : 'Next renewal date';
+  emiPrev();
+}
+function emiPrev() {
+  const t = +$('fTotal').value, n = Math.floor(+$('fTenure').value), r = +$('fRate').value || 0;
+  const e = Math.round(emiCalc(t, n, r));
+  $('emiPrev').textContent = e ? 'EMI: ' + money(e) + ' per month · total payable ' + money(e * n) : 'Enter total amount and months to see your monthly EMI.';
+}
+function openSheet(id = null) {
+  editId = id; $('ferr').textContent = '';
+  const found = subs.find(x => x.id === id), s = found || {};
+  $('sTitle').textContent = found ? 'Edit subscription' : 'Add subscription';
+  $('fName').value = s.name || ''; $('fCat').value = s.cat || 'Entertainment';
+  $('fPay').value = s.pay || 'online'; $('fCard').value = s.card || '';
+  $('fCycle').value = s.cycle === 'yearly' ? 'yearly' : 'monthly';
+  $('fPrice').value = s.pay === 'emi' ? '' : (s.price || '');
+  $('fTotal').value = s.emiTotal || ''; $('fTenure').value = s.tenure || '';
+  $('fRate').value = s.rate || ''; $('fPaid').value = s.paid || '';
+  $('fDate').value = s.date || '';
+  syncForm();
+  $('shade').classList.add('open'); $('fName').focus();
+}
+function closeSheet() { $('shade').classList.remove('open'); }
+function save() {
+  const name = $('fName').value.trim(), cat = $('fCat').value, pay = $('fPay').value, date = $('fDate').value;
+  const fail = m => { $('ferr').textContent = m; };
+  if (!name) return fail('Enter a name.');
+  const obj = { name, cat, pay, date };
+  if (pay === 'emi') {
+    const total = +$('fTotal').value, n = Math.floor(+$('fTenure').value), rate = +$('fRate').value || 0, paid = Math.floor(+$('fPaid').value) || 0;
+    if (!(total > 0)) return fail('Enter the total amount.');
+    if (!(n > 0 && n <= 120)) return fail('Enter months between 1 and 120.');
+    if (rate < 0) return fail('Interest cannot be negative.');
+    if (paid < 0 || paid > n) return fail('EMIs paid must be between 0 and ' + n + '.');
+    obj.price = Math.round(emiCalc(total, n, rate)); obj.cycle = 'emi';
+    obj.emiTotal = total; obj.tenure = n; obj.rate = rate; obj.paid = paid;
+  } else {
+    const price = +$('fPrice').value, card = $('fCard').value.trim();
+    if (!(price > 0)) return fail('Enter a price above 0.');
+    if (pay === 'card' && card && !/^\d{4}$/.test(card)) return fail('Card: enter only the last 4 digits.');
+    obj.price = price; obj.cycle = $('fCycle').value;
+    if (pay === 'card' && card) obj.card = card;
+  }
+  if (!date) return fail('Pick the next due date.');
+  if (editId) subs = subs.map(x => x.id === editId ? Object.assign({ id: x.id }, obj) : x);
+  else subs.push(Object.assign({ id: Date.now() }, obj));
+  write('st_subs_' + user, subs); closeSheet(); render();
+}
+function del(id) {
+  if (!confirm('Delete this subscription?')) return;
+  subs = subs.filter(s => s.id !== id); write('st_subs_' + user, subs); render();
+}
+
+/* ---------- budget ---------- */
+function openBudget() { $('berr').textContent = ''; $('bIn').value = budget || ''; $('bshade').classList.add('open'); $('bIn').focus(); }
+function closeBudget() { $('bshade').classList.remove('open'); }
+function saveBudget() {
+  const v = +$('bIn').value;
+  if (!(v > 0)) { $('berr').textContent = 'Enter an amount above 0.'; return; }
+  budget = Math.round(v); write('st_budget_' + user, budget); closeBudget(); render();
+}
+function clearBudget() { budget = 0; write('st_budget_' + user, 0); closeBudget(); render(); }
+
+/* ---------- chart builders ---------- */
+const DCOL = ['#8b5cf6', '#d8b4fe', '#6d28d9', '#e879f9', '#818cf8', '#f0abfc'];
+function donut(entries, total) {
+  let off = 0; const R = 15.915;
+  const segs = entries.map(([c, v], i) => {
+    const pct = v / total * 100;
+    const seg = `<circle cx="21" cy="21" r="${R}" fill="none" stroke="${DCOL[i % DCOL.length]}" stroke-width="5" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${25 - off}"/>`;
+    off += pct; return seg;
+  }).join('');
+  return `<svg viewBox="0 0 42 42" class="donut" role="img" aria-label="Spending by category"><circle cx="21" cy="21" r="${R}" fill="none" stroke="#242438" stroke-width="5"/>${segs}<text x="21" y="21" text-anchor="middle" font-size="4.4" font-weight="700" fill="#f4f3ff">${money(total)}</text><text x="21" y="25.6" text-anchor="middle" font-size="2.5" fill="#9795b3">per month</text></svg>`;
+}
+function spark(vals) {
+  const w = 200, h = 56, mx = Math.max(...vals, 1);
+  const pts = vals.map((v, i) => [(i / (vals.length - 1) * w).toFixed(1), (h - 4 - (v / mx) * (h - 12)).toFixed(1)]);
+  const line = pts.map(p => p.join(',')).join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="spark"><polygon points="0,${h} ${line} ${w},${h}" fill="rgba(139,92,246,.22)"/><polyline points="${line}" fill="none" stroke="#a78bfa" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function forecast() {
+  if (!subs.length) return '<div class="empty">Add subscriptions to see your monthly forecast.</div>';
+  const pr = projection(), mx = Math.max(...pr.map(x => x.v), 1), H = 130;
+  return `<div class="fc">${pr.map((x, i) => {
+    const he = x.emi / mx * H, hs = (x.v - x.emi) / mx * H;
+    return `<div class="fcol${i === 0 ? ' now' : ''}" title="${esc(x.label)}: ${money(x.v)}"><span class="v">${money(x.v)}</span><div class="stack">${x.emi > 0 ? `<div class="seg e" style="height:${Math.max(3, he)}px"></div>` : ''}${x.v - x.emi > 0 ? `<div class="seg s" style="height:${Math.max(3, hs)}px"></div>` : ''}${x.v === 0 ? '<div class="seg s" style="height:3px"></div>' : ''}</div><span class="m">${x.label}</span></div>`;
+  }).join('')}</div><div class="keys"><span><i style="background:var(--seg-s)"></i>Subscriptions</span><span><i style="background:var(--seg-e)"></i>EMI</span></div>`;
+}
+const barRow = (c, v, mt) => `<div class="bar"><div class="row"><span>${esc(c)}</span><span>${money(v)} (${Math.round(v / mt * 100)}%)</span></div><div class="track"><div class="fill" style="width:${v / mt * 100}%"></div></div></div>`;
+
+/* ---------- render ---------- */
+function renderSubs() {
+  const list = [...subs].sort((a, b) => daysLeft(a.date) - daysLeft(b.date))
+    .filter(s => (fpay === 'all' || s.pay === fpay) && (!fq || (s.name + ' ' + s.cat).toLowerCase().includes(fq)));
+  $('subsCount').textContent = list.length + (list.length === 1 ? ' subscription' : ' subscriptions') + (fq || fpay !== 'all' ? ' (filtered)' : '');
+  $('subsList').innerHTML = list.length ? list.map(s => {
+    const done = !isActive(s), d = daysLeft(s.date);
+    const st = done ? '<span class="chip green">Completed</span>' : d < 0 ? `<span class="chip red">Overdue ${-d}d</span>` : d <= 7 ? `<span class="chip amber">${d === 0 ? 'Today' : d + ' days left'}</span>` : `<span class="chip">${d} days left</span>`;
+    return `<div class="trow">
+      ${icon(s)}
+      <div><b>${esc(s.name)}</b><small>${esc(s.cat)}</small></div>
+      <div><span class="chip blue">${esc(payText(s))}</span></div>
+      <div class="amt" style="text-align:left">${money(s.price)}<span class="per">${perText(s)}</span></div>
+      <div>${fmtDate(s.date)}<br>${st}</div>
+      <div class="tx"><button class="ib" onclick="openSheet(${s.id})" aria-label="Edit ${esc(s.name)}">✎</button><button class="ib" onclick="del(${s.id})" aria-label="Delete ${esc(s.name)}">✕</button></div>
+    </div>`;
+  }).join('') : `<div class="empty">${subs.length ? 'No subscriptions match your filters.' : 'No subscriptions yet. Click “New Subscription” to add your first one.'}</div>`;
+}
+
+function render() {
+  const sorted = [...subs].sort((a, b) => daysLeft(a.date) - daysLeft(b.date));
+  const act = sorted.filter(isActive);
+  const mt = monthlyTotal(), pr = projection();
+  const pm = { online: 0, card: 0, emi: 0 };
+  subs.forEach(s => { pm[s.pay] = (pm[s.pay] || 0) + monthlyNow(s); });
+
+  /* overview cards */
+  $('kMonth').textContent = money(mt);
+  $('kMonthSub').textContent = subs.length ? 'Forecast next month: ' + money(pr[1].v) : 'Add a subscription to begin';
+  $('kSpark').innerHTML = subs.length ? spark(pr.map(x => x.v)) : '';
+  const soon = act.filter(s => { const d = daysLeft(s.date); return d >= 0 && d <= 7; }).length;
+  $('kActive').textContent = act.length;
+  $('kActiveSub').textContent = soon + (soon === 1 ? ' renewal' : ' renewals') + ' in the next 7 days';
+  $('kBudget').innerHTML = budget > 0
+    ? `<div class="prog"><i class="${mt > budget ? 'over' : ''}" style="width:${Math.min(100, mt / budget * 100)}%"></i></div><div class="bl"><span>Budget</span><b>${money(mt)} / ${money(budget)}</b></div>`
+    : '<div style="margin-top:16px"><button class="link" onclick="openBudget()">Set a monthly budget →</button></div>';
+  const sv = savings();
+  $('kSave').textContent = money(sv.tot);
+  $('kSaveSub').textContent = sv.n ? sv.n + ' overlapping ' + (sv.n > 1 ? 'categories' : 'category') + ' (rotate or drop one)' : 'No overlapping plans found';
+
+  /* renewals */
+  const up = act.slice(0, 4);
+  $('renewals').innerHTML = up.length ? up.map(s => {
+    const d = daysLeft(s.date), cls = d < 0 ? 'red' : d <= 7 ? 'amber' : '';
+    return `<div class="rn">${icon(s)}<div><b>${esc(s.name)}</b><small>${d < 0 ? 'Was due' : 'Renews on'} ${fmtDate(s.date)}</small></div>
+      <div class="ra"><span class="chip blue">${esc(payText(s))}</span></div>
+      <div class="amt">${money(s.price)}<span class="per">${perText(s)}</span><br><span class="chip ${cls}">${label(d)}</span></div></div>`;
+  }).join('') : '<div class="empty">No upcoming renewals yet.</div>';
+  $('vAll').textContent = subs.length; $('bSubs').textContent = subs.length;
+
+  /* donut */
+  const by = {};
+  subs.forEach(s => { const v = monthlyNow(s); if (v > 0) by[s.cat] = (by[s.cat] || 0) + v; });
+  const cats = Object.entries(by).sort((a, b) => b[1] - a[1]);
+  $('donutBox').innerHTML = cats.length
+    ? donut(cats, mt) + `<div class="legend">${cats.map(([c, v], i) => `<span><i style="background:${DCOL[i % DCOL.length]}"></i>${esc(c)} · ${money(v)}</span>`).join('')}</div>`
+    : '<div class="empty">Add subscriptions to see your category split.</div>';
+
+  /* payments + EMIs */
+  const names = { online: 'Online payment', card: 'Credit card', emi: 'EMI' };
+  const payHtml = mt > 0 ? Object.keys(names).filter(k => pm[k] > 0).map(k => barRow(names[k], pm[k], mt)).join('') : '<div class="empty">No payments to split yet.</div>';
+  $('payOv').innerHTML = payHtml; $('payBars').innerHTML = payHtml;
+  const emis = subs.filter(s => s.pay === 'emi' && emiLeft(s) > 0);
+  $('emiList').innerHTML = emis.length ? '<div class="grp" style="padding:8px 0 2px">Active EMIs</div>' + emis.map(s => {
+    const paid = s.paid || 0;
+    return `<div class="emi"><div class="bl"><b>${esc(s.name)}</b><span>${money(s.price)}/mo · ${emiLeft(s)} left</span></div><div class="prog"><i style="width:${paid / s.tenure * 100}%"></i></div></div>`;
+  }).join('') : '';
+
+  /* forecast */
+  $('fcOv').innerHTML = forecast(); $('fcAn').innerHTML = forecast();
+
+  /* analytics */
+  $('sMonth').textContent = money(mt); $('sYear').textContent = money(mt * 12); $('sEmi').textContent = money(pm.emi);
+  const nxt = act.find(s => daysLeft(s.date) >= 0);
+  $('sNext').textContent = nxt ? nxt.name + ' · ' + daysLeft(nxt.date) + 'd' : '–';
+  $('catBars').innerHTML = cats.length ? cats.map(([c, v]) => barRow(c, v, mt)).join('') : '<div class="empty">Add subscriptions to see your spending split.</div>';
+
+  /* notifications */
+  const al = alerts();
+  $('notesList').innerHTML = al.length ? al.map(a => `<div class="nt"><span class="dot ${a.t}"></span><div><b>${esc(a.h)}</b><br><small>${esc(a.p)}</small></div></div>`).join('') : '<div class="empty">You\'re all caught up. Nothing needs attention.</div>';
+  const nb = $('bNotes'); nb.textContent = al.length; nb.style.display = al.length ? '' : 'none'; nb.className = 'bd hot';
+
+  renderSubs();
+}
+
+/* ---------- AI: built-in assistant + Llama 3.2 (Ollama) + your own API ---------- */
+const DEFAULT_MODEL = 'llama3.2';
+const cfg = Object.assign({ url: 'http://localhost:11434', model: DEFAULT_MODEL, mode: 'auto', apiUrl: '', apiKey: '', apiModel: '', wlModel: 'Llama-3.2-1B-Instruct-q4f16_1-MLC' }, read('st_ai', {}));
+let history = [], busy = false, ollamaOk = false;
+const saveCfg = () => write('st_ai', cfg);
+const base = () => cfg.url.replace(/\/+$/, '');
+
+function setPill(state, text) {
+  $('pill').className = 'pill ' + state;
+  $('pillTxt').textContent = text;
+}
+function fillModels(names) {
+  const list = names.length ? names : [cfg.model];
+  $('modelSel').innerHTML = list.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  if (!list.includes(cfg.model)) {
+    cfg.model = list.find(n => n.startsWith(DEFAULT_MODEL)) || list[0];
+    saveCfg();
+  }
+  $('modelSel').value = cfg.model;
+}
+function setModel(m) { cfg.model = m; saveCfg(); }
+function setMode(m) { cfg.mode = m; saveCfg(); checkOllama(); }
+function saveUrl() {
+  cfg.url = $('urlIn').value.trim() || cfg.url;
+  cfg.apiUrl = $('apiUrl').value.trim();
+  cfg.apiKey = $('apiKey').value.trim();
+  cfg.apiModel = $('apiModel').value.trim();
+  saveCfg(); checkOllama();
+}
+
+async function checkOllama() {
+  $('urlIn').value = cfg.url; $('apiUrl').value = cfg.apiUrl;
+  $('apiKey').value = cfg.apiKey; $('apiModel').value = cfg.apiModel;
+  $('modeSel').value = cfg.mode;
+  if (!$('wlSel').options.length) fillWl(WL_DEFAULTS);
+  if (cfg.mode === 'webllm') {
+    const ready = wlEngine && wlId === cfg.wlModel;
+    setPill(ready ? 'ok' : '', ready ? 'Open-source AI ready' : 'Open-source AI: press Load');
+    return;
+  }
+  if (cfg.mode === 'builtin') { setPill('ok', 'Built-in AI ready'); return; }
+  if (cfg.mode === 'custom') {
+    setPill(cfg.apiUrl ? 'ok' : 'bad', cfg.apiUrl ? 'Your AI API' : 'Add API URL in Settings');
+    return;
+  }
+  setPill('', 'Checking…');
+  try {
+    const r = await fetch(base() + '/api/tags');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const names = ((await r.json()).models || []).map(m => m.name);
+    if (!names.length) throw new Error('no models');
+    ollamaOk = true;
+    fillModels(names);
+    setPill('ok', 'Connected · ' + cfg.model);
+  } catch (e) {
+    ollamaOk = false;
+    fillModels([]);
+    if (cfg.mode === 'auto') setPill('ok', 'Built-in AI ready');
+    else setPill('bad', 'Ollama offline');
+  }
+}
+
+/* ----- open-source model running in the browser (WebLLM, WebGPU) ----- */
+const WL_DEFAULTS = [
+  ['Llama-3.2-1B-Instruct-q4f16_1-MLC', 'Llama 3.2 · 1B (fastest)'],
+  ['Llama-3.2-3B-Instruct-q4f16_1-MLC', 'Llama 3.2 · 3B (smarter)'],
+  ['Qwen2.5-1.5B-Instruct-q4f16_1-MLC', 'Qwen 2.5 · 1.5B'],
+  ['SmolLM2-360M-Instruct-q4f16_1-MLC', 'SmolLM2 · 360M (tiny)']
+];
+let wlEngine = null, wlId = null, wlLib = null, wlBusy = null;
+function fillWl(items) {
+  $('wlSel').innerHTML = items.map(([id, l]) => `<option value="${esc(id)}">${esc(l)}</option>`).join('');
+  if (!items.some(x => x[0] === cfg.wlModel)) { cfg.wlModel = items[0][0]; saveCfg(); }
+  $('wlSel').value = cfg.wlModel;
+}
+async function setWl(v) {
+  cfg.wlModel = v; saveCfg();
+  if (wlEngine) { try { await wlEngine.unload(); } catch {} wlEngine = null; wlId = null; }
+  checkOllama();
+}
+function applyPreset(v) { if (v) $('apiUrl').value = v; }
+function loadWl() {
+  if (wlBusy) return wlBusy;
+  wlBusy = (async () => {
+    if (!navigator.gpu) {
+      $('wlTxt').textContent = 'This browser has no WebGPU. Use Chrome or Edge (desktop or a recent Android phone), or pick another mode.';
+      setPill('bad', 'WebGPU not supported'); return false;
+    }
+    if (wlEngine && wlId === cfg.wlModel) { setPill('ok', 'Open-source AI ready'); return true; }
+    $('wlProg').style.display = 'block'; $('wlBar').style.width = '0%'; setPill('', 'Loading model…');
+    try {
+      if (!wlLib) wlLib = await import('https://esm.run/@mlc-ai/web-llm');
+      const have = new Set(((wlLib.prebuiltAppConfig || {}).model_list || []).map(m => m.model_id));
+      const items = WL_DEFAULTS.filter(([id]) => have.has(id));
+      if (items.length) fillWl(items);
+      wlEngine = await wlLib.CreateMLCEngine(cfg.wlModel, {
+        initProgressCallback: pr => { $('wlBar').style.width = Math.round((pr.progress || 0) * 100) + '%'; $('wlTxt').textContent = pr.text || 'Loading…'; }
+      });
+      wlId = cfg.wlModel;
+      $('wlTxt').textContent = 'Model ready. It runs privately on your device and is cached for next time.';
+      setPill('ok', 'Open-source AI ready'); return true;
+    } catch (e) {
+      wlEngine = null; wlId = null;
+      $('wlTxt').textContent = 'Could not load the model: ' + (e.message || e);
+      setPill('bad', 'Model not loaded'); return false;
+    } finally { $('wlProg').style.display = 'none'; }
+  })();
+  wlBusy.finally(() => { wlBusy = null; });
+  return wlBusy;
+}
+async function askWl(msgs, out) {
+  out.textContent = 'Loading open-source model…';
+  if (!(await loadWl())) throw new Error('the open-source model is not loaded');
+  out.textContent = 'Thinking…';
+  const chunks = await wlEngine.chat.completions.create({ messages: msgs, stream: true, temperature: 0.6, max_tokens: 350 });
+  let reply = '';
+  for await (const c of chunks) {
+    reply += (c.choices[0] && c.choices[0].delta.content) || '';
+    out.textContent = reply || 'Thinking…';
+    out.scrollIntoView({ block: 'end' });
+  }
+  return reply.trim() || '(No response)';
+}
+
+/* ----- built-in assistant: works instantly, no setup ----- */
+function localAnswer(q) {
+  q = q.toLowerCase();
+  if (!subs.length) return 'You have no subscriptions yet. Tap + on the Subscriptions tab to add one, then ask me again.';
+  const total = monthlyTotal();
+  const byPrice = [...subs].sort((a, b) => monthlyNow(b) - monthlyNow(a));
+  const bySoon = [...subs].sort((a, b) => daysLeft(a.date) - daysLeft(b.date));
+  const cat = {}; subs.forEach(s => cat[s.cat] = (cat[s.cat] || 0) + monthlyNow(s));
+  const cats = Object.entries(cat).sort((a, b) => b[1] - a[1]);
+  const has = (...w) => w.some(x => q.includes(x));
+  const line = s => `${s.name} (${money(s.price)}, ${label(daysLeft(s.date)).toLowerCase()})`;
+
+  if (has('cancel', 'remove', 'drop', 'unused', 'cut')) {
+    const c = byPrice.find(s => !['Utilities', 'Education'].includes(s.cat)) || byPrice[0];
+    return `I'd look at ${c.name} first. It's your priciest non-essential plan at ${money(c.price)}. If it renews monthly, cancelling saves about ${money(monthlyNow(c) * 12)} a year. Only keep it if you used it in the last month.`;
+  }
+  if (has('save', 'saving', 'reduce', 'cheaper', 'lower')) {
+    const ent = subs.filter(s => s.cat === 'Entertainment');
+    const tips = [`Your top spend is ${byPrice[0].name} at ${money(byPrice[0].price)}. Check if a cheaper plan exists.`];
+    if (ent.length > 1) tips.push(`You have ${ent.length} entertainment plans. Rotate them instead of paying for all at once.`);
+    tips.push('Annual plans and family sharing are often cheaper than monthly solo plans.');
+    return tips.join('\n');
+  }
+  if (has('renew', 'soon', 'due', 'upcoming', 'next', 'when')) {
+    const soon = bySoon.filter(s => { const d = daysLeft(s.date); return d >= 0 && d <= 7; });
+    if (soon.length) return 'Renewing within 7 days:\n' + soon.map(s => '• ' + line(s)).join('\n');
+    const n = bySoon.find(s => daysLeft(s.date) >= 0);
+    return n ? `Nothing renews in the next 7 days. Next up is ${line(n)}.` : 'All your renewal dates are in the past. Edit them to set new dates.';
+  }
+  if (has('emi', 'installment', 'card', 'online', 'payment')) {
+    const g = k => subs.filter(s => s.pay === k);
+    const sum = k => g(k).reduce((t, s) => t + monthlyNow(s), 0);
+    const emis = g('emi').filter(s => emiLeft(s) > 0);
+    let t = `Monthly by payment method:\n• Online payment: ${money(sum('online'))}\n• Credit card: ${money(sum('card'))}\n• EMI: ${money(sum('emi'))}`;
+    if (emis.length) t += '\nActive EMIs: ' + emis.map(s => `${s.name} (${emiLeft(s)} months left)`).join(', ') + '.';
+    return t;
+  }
+  if (has('cheap', 'lowest', 'smallest')) {
+    const c = byPrice[byPrice.length - 1];
+    return `Your cheapest subscription is ${line(c)}.`;
+  }
+  if (has('expensive', 'highest', 'costly', 'most', 'biggest')) {
+    return 'Your most expensive subscriptions:\n' + byPrice.slice(0, 3).map(s => '• ' + line(s)).join('\n');
+  }
+  if (has('categor', 'type', 'split', 'breakdown')) {
+    return 'Spending by category:\n' + cats.map(([c, v]) => `• ${c}: ${money(v)} (${Math.round(v / total * 100)}%)`).join('\n');
+  }
+  if (has('total', 'spend', 'how much', 'cost', 'pay', 'average', 'month', 'expense')) {
+    return `Your monthly expense is ${money(total)} across ${subs.length} subscription${subs.length > 1 ? 's' : ''}, about ${money(Math.round(total / subs.length))} each. ${cats[0][0]} is your biggest category at ${money(cats[0][1])}.`;
+  }
+  const n = bySoon.find(s => daysLeft(s.date) >= 0);
+  return `You have ${subs.length} subscription${subs.length > 1 ? 's' : ''} costing ${money(total)} per month. Biggest: ${byPrice[0].name}.` + (n ? ` Next renewal: ${line(n)}.` : '') + '\nTry asking: "Which to cancel?", "How can I save?" or "What renews soon?"';
+}
+
+/* ----- Ollama (streaming) ----- */
+async function askOllama(msgs, out) {
+  const r = await fetch(base() + '/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: cfg.model, stream: true, messages: msgs })
+  });
+  if (!r.ok) {
+    let m = 'HTTP ' + r.status;
+    try { m = (await r.json()).error || m; } catch {}
+    throw new Error(m);
+  }
+  const reader = r.body.getReader(), dec = new TextDecoder();
+  let buf = '', reply = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n'); buf = lines.pop();
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const j = JSON.parse(line);
+      if (j.error) throw new Error(j.error);
+      reply += (j.message && j.message.content) || '';
+      out.textContent = reply || 'Thinking…';
+      out.scrollIntoView({ block: 'end' });
+    }
+  }
+  return reply.trim() || '(No response)';
+}
+
+/* ----- your own AI API (OpenAI-compatible) ----- */
+async function askCustom(msgs) {
+  if (!cfg.apiUrl) throw new Error('No API URL set');
+  const headers = { 'Content-Type': 'application/json' };
+  if (cfg.apiKey) headers.Authorization = 'Bearer ' + cfg.apiKey;
+  const body = { messages: msgs };
+  if (cfg.apiModel) body.model = cfg.apiModel;
+  const r = await fetch(cfg.apiUrl, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  const t = (j.choices && j.choices[0] && (j.choices[0].message || {}).content) || j.reply || j.response || (j.message && j.message.content) || '';
+  if (!t) throw new Error('Empty reply');
+  return t.trim();
+}
+
+function addMsg(text, who) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + who; d.textContent = text;
+  $('chat').appendChild(d); d.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  return d;
+}
+function clearChat() {
+  history = []; $('chat').innerHTML = '';
+  addMsg('Hi! I can look at your subscriptions and give advice. Ask me anything.', 'bot');
+}
+
+async function ask(text) {
+  if (busy) return;
+  text = (text || $('q').value).trim();
+  if (!text) return;
+  busy = true; $('sendBtn').disabled = true;
+  $('q').value = ''; addMsg(text, 'me');
+  const out = addMsg('Thinking…', 'bot');
+  const today = new Date().toISOString().slice(0, 10);
+  const data = subs.length ? subs.map(s => `${s.name} | ${s.cat} | ${payText(s)} | Rs ${s.price}${perText(s)} | ${label(daysLeft(s.date))}`).join('\n') + `\nMonthly expense total: Rs ${Math.round(monthlyTotal())}` : 'No subscriptions yet.';
+  history.push({ role: 'user', content: text });
+  const msgs = [
+    { role: 'system', content: 'You are a friendly assistant inside a subscription manager app. Today is ' + today + '. Answer in 3-4 short sentences using only this user data (prices in rupees):\n' + data },
+    ...history
+  ];
+  let reply = '';
+  try {
+    if (cfg.mode === 'webllm') reply = await askWl(msgs, out);
+    else if (cfg.mode === 'custom') reply = await askCustom(msgs);
+    else if (cfg.mode === 'ollama' || (cfg.mode === 'auto' && ollamaOk)) reply = await askOllama(msgs, out);
+    else reply = localAnswer(text);
+  } catch (e) {
+    if (cfg.mode === 'ollama' || cfg.mode === 'webllm') {
+      history.pop();
+      out.textContent = cfg.mode === 'webllm' ? 'Open-source model problem: ' + e.message + '. Press Load in AI settings, or switch the mode to Auto.' : /not found/i.test(e.message)
+        ? 'Model "' + cfg.model + '" is not installed. Run: ollama pull llama3.2'
+        : 'Could not reach Ollama (' + e.message + '). Open Settings above for setup steps, or switch mode to Auto.';
+      busy = false; $('sendBtn').disabled = false; checkOllama();
+      return;
+    }
+    ollamaOk = false;
+    reply = (cfg.mode === 'custom' ? '(Your AI API failed: ' + e.message + '. Showing the built-in answer.)\n' : '') + localAnswer(text);
+  }
+  out.textContent = reply;
+  history.push({ role: 'assistant', content: reply });
+  out.scrollIntoView({ block: 'end' });
+  busy = false; $('sendBtn').disabled = false;
+}
+
+
+
+/* ---------- boot ---------- */
+clearChat();
+const sess = read('st_session', null);
+if (sess && read('st_users', {})[sess]) start(sess);
+</script>
+</body>
+</html>
