@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscription Manager</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; }
+header { background: #4f46e5; color: white; padding: 16px; text-align: center; }
+header h1 { margin: 0; font-size: 22px; }
+main { max-width: 600px; margin: 16px auto; padding: 0 12px; }
+.card {
+  background: white; padding: 16px; border-radius: 12px;
+  margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.form input, .form select, .form button {
+  width: 100%; padding: 10px; margin-bottom: 8px; font-size: 16px;
+  border: 1px solid #d1d5db; border-radius: 8px;
+}
+.add { background: #4f46e5; color: white; border: none; cursor: pointer; }
+.add:hover { background: #4338ca; }
+.alert {
+  background: #fef2f2; border: 1px solid #ef4444; color: #b91c1c;
+  padding: 12px; border-radius: 12px; margin-bottom: 16px;
+}
+ul { list-style: none; padding: 0; margin: 0; }
+li {
+  padding: 10px; margin-bottom: 8px; background: #f9fafb;
+  border-radius: 8px; border-left: 4px solid #4f46e5;
+}
+li.urgent { border-left-color: #ef4444; background: #fef2f2; }
+li.expired { border-left-color: #9ca3af; opacity: 0.7; }
+li button {
+  margin-top: 6px; padding: 4px 10px; border: none;
+  border-radius: 6px; cursor: pointer;
+}
+.total { text-align: right; color: #4f46e5; }
+.bar-row { margin-bottom: 10px; }
+.bar { background: #e5e7eb; border-radius: 6px; height: 12px; }
+.fill { background: #4f46e5; height: 12px; border-radius: 6px; }
+.empty { color: #6b7280; }
+</style>
+</head>
+<body>
+
+<header><h1>💳 Subscription Manager</h1></header>
+
+<main>
+  <div id="alert" class="alert" hidden></div>
+
+  <section class="card form">
+    <input id="name" placeholder="Name (Netflix)">
+    <input id="price" type="number" placeholder="Price">
+    <input id="date" type="date">
+    <select id="category">
+      <option>OTT</option>
+      <option>Music</option>
+      <option>Software</option>
+      <option>Other</option>
+    </select>
+    <button class="add" onclick="addSub()">Add</button>
+  </section>
+
+  <section class="card">
+    <h3>Your Subscriptions</h3>
+    <ul id="list"></ul>
+    <h3 class="total">Total: ₹<span id="total">0</span></h3>
+  </section>
+
+  <section class="card">
+    <h3>Spending by Category</h3>
+    <div id="summary"></div>
+  </section>
+</main>
+
+<script>
+let subs = [];
+try { subs = JSON.parse(localStorage.getItem("subs")) || []; } catch (e) { subs = []; }
+
+function save() {
+  try { localStorage.setItem("subs", JSON.stringify(subs)); } catch (e) {}
+}
+
+function esc(t) {
+  const d = document.createElement("div");
+  d.textContent = t;
+  return d.innerHTML;
+}
+
+function parseDate(s) {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function validDate(s) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(parseDate(s));
+}
+
+function daysLeft(s) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((parseDate(s) - today) / 86400000);
+}
+
+function addSub() {
+  const name = document.getElementById("name").value.trim();
+  const price = Number(document.getElementById("price").value);
+  const date = document.getElementById("date").value;
+  const category = document.getElementById("category").value;
+
+  if (!name || !(price > 0) || !validDate(date)) {
+    alert("Please enter a name, a price above 0 and a date");
+    return;
+  }
+  subs.push({ id: Date.now(), name, price, date, category });
+  save();
+  render();
+  document.getElementById("name").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("date").value = "";
+}
+
+function deleteSub(id) {
+  if (!confirm("Delete this subscription?")) return;
+  subs = subs.filter(s => s.id !== id);
+  save();
+  render();
+}
+
+function editSub(id) {
+  const s = subs.find(x => x.id === id);
+  const name = prompt("Name:", s.name);
+  if (name === null) return;
+  const price = prompt("Price:", s.price);
+  if (price === null) return;
+  const date = prompt("Renewal date (YYYY-MM-DD):", s.date);
+  if (date === null) return;
+
+  if (!name.trim() || !(Number(price) > 0) || !validDate(date)) {
+    alert("Please enter valid values");
+    return;
+  }
+  s.name = name.trim();
+  s.price = Number(price);
+  s.date = date;
+  save();
+  render();
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  let total = 0;
+  const byCategory = {};
+  const dueSoon = [];
+
+  const sorted = [...subs].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+  if (sorted.length === 0) {
+    list.innerHTML = '<li class="empty">No subscriptions yet. Add one above.</li>';
+  }
+
+  sorted.forEach(s => {
+    total += s.price;
+    byCategory[s.category] = (byCategory[s.category] || 0) + s.price;
+
+    const d = daysLeft(s.date);
+    let status, cls = "";
+    if (d < 0) { status = "Expired"; cls = "expired"; }
+    else if (d === 0) { status = "⚠️ Renews today"; cls = "urgent"; dueSoon.push(s.name + " (today)"); }
+    else if (d <= 3) { status = "⚠️ " + d + " days left"; cls = "urgent"; dueSoon.push(s.name + " (" + d + " days)"); }
+    else { status = d + " days left"; }
+
+    list.innerHTML += `
+      <li class="${cls}">
+        <b>${esc(s.name)}</b> (${esc(s.category)}) - ₹${s.price} | ${status}<br>
+        <button onclick="editSub(${s.id})">Edit</button>
+        <button onclick="deleteSub(${s.id})">Delete</button>
+      </li>`;
+  });
+
+  document.getElementById("total").textContent = total;
+
+  // Spending by category
+  const summary = document.getElementById("summary");
+  summary.innerHTML = "";
+  Object.keys(byCategory).forEach(cat => {
+    const pct = total ? Math.round((byCategory[cat] / total) * 100) : 0;
+    summary.innerHTML += `
+      <div class="bar-row">
+        <span>${esc(cat)}: ₹${byCategory[cat]} (${pct}%)</span>
+        <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+      </div>`;
+  });
+
+  // Renewal alert banner
+  const alertBox = document.getElementById("alert");
+  if (dueSoon.length) {
+    alertBox.hidden = false;
+    alertBox.textContent = "⚠️ Renewing soon: " + dueSoon.join(", ");
+  } else {
+    alertBox.hidden = true;
+  }
+}
+
+render();
+</script>
+</body>
+</html>
